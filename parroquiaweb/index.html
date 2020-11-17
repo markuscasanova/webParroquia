@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Parroquia - SANTA JULIANA Y SEMPRONIANA</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom fonts for this template -->
+  <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/one-page-wonder.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">PARROQUIA SANTA JULIANA Y SEMPRONIANA</a>
+    </div>
+  </nav>
+
+  <header class="masthead text-center text-white">
+    <div class="masthead-content">
+      <div class="container">
+        <h1 class="masthead-heading mb-0">Servicio de Reservas</h1>
+        <h2 class="masthead-subheading mb-0">Palabras y Eucaristias</h2>
+      </div>
+    </div>
+    <div class="bg-circle-1 bg-circle"></div>
+    <div class="bg-circle-2 bg-circle"></div>
+    <div class="bg-circle-3 bg-circle"></div>
+    <div class="bg-circle-4 bg-circle"></div>
+  </header>
+
+  <section>
+<!-- Default form contact -->
+<form class="text-center border border-light p-5" action="#!">
+
+  <p class="h4 mb-4">Formulario</p>
+
+  <h1>Próximos eventos</h1>
+
+  <div class="list-group">
+    <a href="#" class="list-group-item active">Martes 14</a>
+    <a href="#" class="list-group-item">Sábado 18</a>
+    <a href="#" class="list-group-item">Martes 21</a>
+    <a href="#" class="list-group-item">Sábado 25</a>
+  </div>
+  
+  <div class="alert alert-warning" role="alert">
+    Seleccione cuanta gente quiere registrar.
+  </div>
+
+  <button type="button" class="listP btn btn-outline-primary personaList1 btn-lg">Individual</button>
+  <button type="button" class="listP btn btn btn-outline-warning personaList2 btn-lg">Dos Personas</button>
+  <button type="button" class="listP btn btn-outline-danger personaList3 btn-lg">Grupos (3 a 6p)</button>
+
+  <p class="h4 mb-4"></p>
+
+  <!-- Name -->
+  <div class="form-group">
+    <div class="hideP1">
+      <label for="exampleFormControlInput1">Persona 1</label>
+    </div>        
+    <div class="hideFam">
+      <label for="exampleFormControlInput1">Responsable Familiar</label>
+    </div>        
+    <div class="hideP3">
+      <label for="exampleFormControlInput1">Persona 3</label>
+      <input type="text" class="form-control p3" id="exampleFormControlInput1" placeholder="">
+    </div>
+  </div>
+  <input type="text" id="defaultContactFormName" class="form-control mb-4 formP1" placeholder="Nombre Completo">
+  <div class="hideP2" >
+    <label for="exampleFormControlInput1">Persona 2</label>
+    <input type="text" class="form-control formP2" id="exampleFormControlInput1" placeholder="Nombre Completo">
+  </div>
+  <p class="h4 mb-4"></p>
+  <div class="numberList">
+    <div class="form-group">
+      <label for="exampleFormControlSelect1">Comunidad</label>
+      <select class="form-control comunidadList" id="exampleFormControlSelect1">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+        <option>7</option>
+        <option>8</option>
+        <option>9</option>
+        <option>10</option>
+        <option>11</option>
+        <option>12</option>
+        <option>13</option>
+        <option>14</option>
+        <option>15</option>
+        <option>16</option>
+        <option>17</option>
+        <option>18</option>
+        <option>19</option>
+        <option>20</option>
+      </select>
+    </div>
+    <p class="h4 mb-4"></p>
+    <p class="h4 mb-4"></p>
+    <p class="h4 mb-4"></p>
+
+    <p>Date: <input type="text" id="datepicker" class="datepicker" data-date-format="mm/dd/yyyy"></p>
+
+
+  </div>
+  <!-- Send button -->
+  <button class="btn btn-info btn-block submitForm" type="submit">Reservar</button>
+</form>
+
+<table id="grid-data-api" class="table table-condensed table-hover table-striped" data-toggle="bootgrid" data-ajax="true" data-url="https://pdmx2p5svd.execute-api.eu-west-1.amazonaws.com/dev/todos/api">
+  <thead>
+      <tr>
+          <th data-column-id="id" data-type="numeric" data-identifier="true">ID</th>
+          <th data-column-id="day">Día</th>
+          <th data-column-id="type" data-order="desc">Tipo</th>
+          <th data-column-id="p1">Persona Titular</th>
+          <th data-column-id="p2" data-order="desc">Acompañante</th>
+          <th data-column-id="com">Comunidad</th>
+      </tr>
+  </thead>
+</table>
+
+<div class="reservasCacheadas">
+  <div class="w3-panel w3-yellow">
+    <h3>Reservas realizadas recientemente</h3>
+    <div id="demo" class="display">
+      <table class="display dataTable">
+        <thead>
+          <tr>
+            <th>Com.</th>
+            <th>Día</th>
+            <th>Persona</th>
+            <th>Acompañante</th>
+            <th>Tipo</th>
+          </tr>
+      </thead>
+      <tbody class="bodyReservas">
+      </tbody>
+      </table>
+  </div>    <p>Esta función se encuentra en fase de desarrollo. Se pueden encontrar errores que afecten al rendimiento de la aplicación y se resolverán lo más rápido posible.</p>
+  </div> 
+</div>
+<!-- Default fo
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-5 bg-black">
+    <div class="container">
+      <p class="m-0 text-center text-white small">Copyright &copy; Marc Casanova</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+</body>
+
+
+<!-- Bootstrap core  &  JavaScript -->
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+<script src="https://code.jscharting.com/latest/jscharting.js"></script>
+
+<link href="/dist/jquery.bootgrid.css" rel="stylesheet">
+<script src="/dist/jquery.bootgrid.js"></script>
+
+<script src="js/index.js"></script>
+
+</html>
