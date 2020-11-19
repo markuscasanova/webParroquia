@@ -70,7 +70,7 @@ $(".submitForm").click(function(){
 
  
     var settings = {
-        "url": "https://pne59nj943.execute-api.eu-west-1.amazonaws.com/dev/todos",
+        "url": "https://3koehqpokc.execute-api.eu-west-1.amazonaws.com/dev/todos",
         "method": "POST",
         "timeout": 0,
         "headers": {
@@ -189,7 +189,61 @@ window.onload = function() {
     //$("#grid-basic").bootgrid();
     //writeData();
     loadCachedRes()
+    var martes = calcularProximosEventos(2);
+    var month = martes.getMonth()+1;
+    $('.martes-id')[0].innerText = "Martes : "+ martes.getDate()+"/"+month+"/"+martes.getFullYear();
 
+    var miercoles = calcularProximosEventos(3);
+    month = miercoles.getMonth()+1;
+    $('.miercoles-id')[0].innerText = "Miércoles : "+ miercoles.getDate()+"/"+month+"/"+miercoles.getFullYear();
+
+    var sabado = calcularProximosEventos(6);
+    month = sabado.getMonth()+1;
+    $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear();
+    
+    fillPlazas()
+
+    function fillPlazas()
+    {
+        var data = $('.active').text();
+        var fecha = data.split(": ")[1];
+        fecha = fecha.replace('/', 'a');        
+        fecha = fecha.replace('/', 'a');        
+        var settings = {
+            "url": "https://3koehqpokc.execute-api.eu-west-1.amazonaws.com/dev/avail/"+fecha,
+            "method": "GET",
+            "timeout": 0,
+          };
+          
+          $.ajax(settings).done(function (response) {
+            console.log(response);
+            var individuales = document.createElement("li");
+            var n1 = 20 - parseInt(response.ind);
+            var n2 = 20 - parseInt(response.dob);
+            var n3 = 20 - parseInt(response.fam);
+
+            individuales.innerText ="Reservas individuales Restantes : " + n1;
+            $('#individuales').append(individuales); 
+    
+            var dobles = document.createElement("li");
+            dobles.innerText = "Reservas Dobles Restantes : " + n2;
+            $('#Dobles').append(dobles); 
+    
+    
+            var familiares = document.createElement("li");
+            familiares.innerText = "Reservas Grupales Restantes : " + n3;
+            $('#Familiares').append(familiares);    
+          });
+ 
+    }
+    function calcularProximosEventos(x)
+    {
+        var now = new Date();    
+        now.setDate(now.getDate() + (x+(7-now.getDay())) % 7);
+        return now;
+    }
+
+    
     function writeData()
     {
         var settings = {
@@ -229,7 +283,7 @@ function loadCachedRes()
         }
     }
     $.each(cacheRes, function(){
-        var html = "<tr><td>" + this.com + "</td><td>" + this.day+ "</td><td>" + this.p1+ "</td><td>" + this.p2+ "</td><td>" + this.type+ "</td></tr>";
+          var html = "<tr><td>" + this.com + "</td><td>" + this.day+ "</td><td>" + this.p1+ "</td><td>" + this.p2+ "</td><td>" + this.type+ "</td></tr>";
         $('.bodyReservas').append(html);
     });
 }
