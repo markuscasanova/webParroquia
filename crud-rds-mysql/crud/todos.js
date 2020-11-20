@@ -224,7 +224,7 @@ module.exports.create = (event, context, callback) => {
       var dispo = new Array();
       dispo.push(ind, dob, fam);
       if (body.type == "ind") {
-        if (ind >= "20") {
+        if (ind >= "17") {
           avail = false;
           callback(null, {
             statusCode: 200,
@@ -241,7 +241,7 @@ module.exports.create = (event, context, callback) => {
         }
       }
       if (body.type == "dob") {
-        if (dob >= "20") {
+        if (dob >= "14") {
           avail = false;
           callback(null, {
             statusCode: 200,
@@ -258,7 +258,7 @@ module.exports.create = (event, context, callback) => {
         }
       }
       if (body.type == "fam") {
-        if (fam >= "20") {
+        if (fam >= "12") {
           avail = false;
           callback(null, {
             statusCode: 200,
