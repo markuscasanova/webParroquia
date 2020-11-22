@@ -128,10 +128,14 @@ module.exports.availDate = (event, context, callback) => {
 module.exports.avail = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
   var id = event.pathParameters.todo;
-  var str = id.replace(/a/g, '/');
+  var fecha = id.split("+")[0];
+  var turno = id.split("+")[1];
+  console.log("Datos recibidos :" + fecha + " " + turno);
+  var str = fecha.replace(/a/g, '/');
+  console.log(str + turno);
 
-  const sql = 'SELECT * FROM reservas WHERE day = ?';
-  connection.query(sql, [str], (error, response) => {
+  const sql = 'SELECT * FROM reservas WHERE day = ? && turno = ?';
+  connection.query(sql, [str,turno], (error, response) => {
     if (error) {
       callback({
         statusCode: 500,
@@ -143,6 +147,11 @@ module.exports.avail = (event, context, callback) => {
         body: JSON.stringify(error)
       })
     } else {
+      console.log(response.length)
+      for (b in response)
+      {
+        console.log("La respuesta SQL es : " + response[b]);
+      }
       var ind = 0;
       var dob = 0;
       var fam = 0;
@@ -186,15 +195,16 @@ module.exports.create = (event, context, callback) => {
     p1: body.p1,
     p2: body.p2,
     p3: body.p3,
-    com: body.com
+    com: body.com,
+    turno:body.turno
   };
 
   //FECHA A BUSCAR
   var id = body.day;
-  var str = id.replace(/a/g, '/');
-  const sqlAvail = 'SELECT * FROM reservas WHERE day = ?';
+  var turno = body.turno;
+  const sqlAvail = 'SELECT * FROM reservas WHERE day = ? && turno = ?';
   //COMPROBAMOS QUE AÚN QUEDAN ESPACIOS DISPONIBLES PARA ESE DÍA
-  connection.query(sqlAvail, [str], (error, response) => {
+  connection.query(sqlAvail, [id, turno], (error, response) => {
     if (error) {
       callback({
         statusCode: 500,
@@ -235,7 +245,7 @@ module.exports.create = (event, context, callback) => {
             },
             body: JSON.stringify({
               data,
-              res: "Reserva Fallida : No hay más reservas Individuales para " + body.day,
+              res: "Reserva Fallida : No hay más reservas Individuales para " + body.day + " en el turno : " + turno,
             })
           })
         }
@@ -252,7 +262,7 @@ module.exports.create = (event, context, callback) => {
             },
             body: JSON.stringify({
               data,
-              res: "Reserva Fallida : No hay más reservas Dobles para " + body.day,
+              res: "Reserva Fallida : No hay más reservas Dobles para " + body.day + " en el turno : " + turno,
             })
           })
         }
@@ -269,7 +279,7 @@ module.exports.create = (event, context, callback) => {
             },
             body: JSON.stringify({
               data,
-              res: "Reserva Fallida : No hay más reservas Familiares para " + body.day,
+              res: "Reserva Fallida : No hay más reservas Familiares para " + body.day + " en el turno : " + turno,
             })
           })
         }
