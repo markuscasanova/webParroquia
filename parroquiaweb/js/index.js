@@ -202,6 +202,16 @@ window.onload = function() {
     $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear();
     
     fillPlazas()
+    $( '.list-group-item' ).click(function() {
+        fillSelect($(this));
+      });
+   
+
+    function fillSelect()
+    {
+        //Seteamos los div de los días
+        $(this).attr("selected");
+    }
 
     function fillPlazas()
     {
@@ -234,8 +244,7 @@ window.onload = function() {
             familiares.innerText = "Reservas Grupales Restantes : " + n3;
             $('#Familiares').append(familiares);    
           });
- 
-    }
+     }
     function calcularProximosEventos(x)
     {
         var now = new Date();    

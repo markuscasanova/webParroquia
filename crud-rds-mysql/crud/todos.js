@@ -196,7 +196,8 @@ module.exports.create = (event, context, callback) => {
     p2: body.p2,
     p3: body.p3,
     com: body.com,
-    turno:body.turno
+    turno:body.turno,
+    hora: body.hora
   };
 
   //FECHA A BUSCAR
@@ -245,7 +246,7 @@ module.exports.create = (event, context, callback) => {
             },
             body: JSON.stringify({
               data,
-              res: "Reserva Fallida : No hay más reservas Individuales para " + body.day + " en el turno : " + turno,
+              res: "Reserva Fallida : No hay más reservas Individuales para " + body.day + " a las : " + body.hora,
             })
           })
         }
@@ -262,7 +263,7 @@ module.exports.create = (event, context, callback) => {
             },
             body: JSON.stringify({
               data,
-              res: "Reserva Fallida : No hay más reservas Dobles para " + body.day + " en el turno : " + turno,
+              res: "Reserva Fallida : No hay más reservas Dobles para " + body.day + " a las  : " + body.hora,
             })
           })
         }
@@ -279,7 +280,7 @@ module.exports.create = (event, context, callback) => {
             },
             body: JSON.stringify({
               data,
-              res: "Reserva Fallida : No hay más reservas Familiares para " + body.day + " en el turno : " + turno,
+              res: "Reserva Fallida : No hay más reservas Familiares para " + body.day + " a las : " + body.hora,
             })
           })
         }
@@ -308,7 +309,7 @@ module.exports.create = (event, context, callback) => {
               },
               body: JSON.stringify({
                 data,
-                res: `Reserva realizada correctamente con id ` + result.insertId + ` para el dia ` + data.day,
+                res: `Reserva realizada correctamente con id ` + result.insertId + ` para el dia ` + data.day + " a las : " + body.hora,
               })
             })
           }
