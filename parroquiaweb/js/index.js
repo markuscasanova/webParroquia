@@ -139,18 +139,15 @@ function validateForm()
         case "ind":
             if (!$('.formP1').val()){return "Persona 1"}
             if ($('.comunidadList').val()){check= false}
-            if (!$('.datepicker').val()){return "Fecha"}
         break;
         case "bin":
             if (!$('.formP1').val()){return "Persona 1"}
             if (!$('.formP2').val()){return "Persona 2"}
             if ($('.comunidadList').val()){check= false}
-            if (!$('.datepicker').val()){return "Fecha"}
         break;
         case "fam":
             if (!$('.formP1').val()){return "Persona 1"}
             if ($('.comunidadList').val()){check= false}
-            if (!$('.datepicker').val()){return "Fecha"}
         break;  
         default:
         return true
@@ -201,16 +198,19 @@ window.onload = function() {
 
     var sabado = calcularProximosEventos(6);
     month = sabado.getMonth()+1;
-    $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno<1> : 18h";
-    $('.sabado-id2')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno<2> : 19:30h";
-    $('.sabado-id3')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno<3> : 21h";
+    $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+": Turno<1> : 18h";
+    $('.sabado-id2')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+": Turno<2> : 19:30h";
+    $('.sabado-id3')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+": Turno<3> : 21h";
 
     
     
     fillPlazas()
     $( '.list-group-item' ).click(function() {
         fillSelect($(this));
-        fillPlazas()
+        $('.active').removeClass('active');
+        $(this).addClass('active');
+        window.day = $(this).text().split(': ')[1];
+        fillPlazas();
       });
    
 
@@ -225,13 +225,19 @@ window.onload = function() {
         var data = $('.active').text();
         var fecha = data.split(": ")[1];
         var turno = data.split("<")[1]
+        window.fecha = fecha;
         if(turno != undefined)
         {
-            turno = data.split("<")[1].charAT(0);
+            var v = data.split("<")[1];
+            turno = v.split('>')[0];
+            fecha = fecha.split(':')[0];
+            window.turno = turno;
+            window.fecha = fecha;
         }
         else
         {
             turno = "0";
+            window.turno = turno;
         }
 
         fecha = fecha.replace('/', 'a');        
