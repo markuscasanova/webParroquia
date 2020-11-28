@@ -77,7 +77,7 @@ $(".submitForm").click(function(){
           "Content-Type": "application/x-www-form-urlencoded"
         },
         "data": {
-          "day": $(".datepicker").val(),
+          "day": window.day,
           "type": window.type,
           "p1": $(".formP1").val(),
           "p2": $(".formP2").val(),
@@ -226,6 +226,7 @@ window.onload = function() {
         var fecha = data.split(": ")[1];
         var turno = data.split("<")[1]
         window.fecha = fecha;
+        window.day = fecha;
         if(turno != undefined)
         {
             var v = data.split("<")[1];
@@ -233,6 +234,7 @@ window.onload = function() {
             fecha = fecha.split(':')[0];
             window.turno = turno;
             window.fecha = fecha;
+            window.day = fecha;
         }
         else
         {
