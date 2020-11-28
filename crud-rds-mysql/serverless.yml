@@ -114,6 +114,12 @@ functions:
       - http:
           path: availDate/{todo}
           method: get
+  dispo:
+    handler: crud/todos.dispo
+    events:
+      - http:
+          path: dispo/{todo}
+          method: get
                 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

@@ -199,7 +199,11 @@ window.onload = function() {
 
     var sabado = calcularProximosEventos(6);
     month = sabado.getMonth()+1;
-    $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear();
+    $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno 1 : 18h";
+    $('.sabado-id2')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno 2 : 19:30h";
+    $('.sabado-id3')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno 3 : 21h";
+
+    
     
     fillPlazas()
     $( '.list-group-item' ).click(function() {
@@ -227,22 +231,22 @@ window.onload = function() {
           
           $.ajax(settings).done(function (response) {
             console.log(response);
-            var individuales = document.createElement("li");
+            //var individuales = document.createElement("li");
             var n1 = 17 - parseInt(response.ind);
             var n2 = 14 - parseInt(response.dob);
             var n3 = 12 - parseInt(response.fam);
 
-            individuales.innerText ="Reservas individuales Restantes : " + n1;
-            $('#individuales').append(individuales); 
+            //individuales.innerText ="Reservas individuales Restantes : " + n1;
+            $('#individuales li')[0].innerText = "Reservas individuales Restantes : " + n1; 
     
             var dobles = document.createElement("li");
-            dobles.innerText = "Reservas Dobles Restantes : " + n2;
-            $('#Dobles').append(dobles); 
+            //dobles.innerText = "Reservas Dobles Restantes : " + n2;
+            $('#Dobles li')[0].innerText = "Reservas Dobles Restantes : " + n2; 
     
     
             var familiares = document.createElement("li");
-            familiares.innerText = "Reservas Grupales Restantes : " + n3;
-            $('#Familiares').append(familiares);    
+            //familiares.innerText = "Reservas Grupales Restantes : " + n3;
+            $('#Familiares li')[0].innerText = "Reservas Grupales Restantes : " + n3; 
           });
      }
     function calcularProximosEventos(x)

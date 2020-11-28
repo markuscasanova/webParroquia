@@ -31,6 +31,64 @@ module.exports.findAll = (event, context, callback) => {
   })
 };
 
+module.exports.dispo = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+  var fecha = event.pathParameters.todo;
+  console.log("Datos recibidos :" + fecha);
+  var str = fecha.replace(/a/g, '/');
+  console.log(str);
+
+  const sql = 'SELECT * FROM reservas WHERE day = ?';
+  connection.query(sql, [str], (error, response) => {
+    if (error) {
+      callback({
+        statusCode: 500,
+        headers: {
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+        },
+        body: JSON.stringify(error)
+      })
+    } else {
+      console.log(response.length)
+      for (b in response)
+      {
+        console.log("La respuesta SQL es : " + response[b]);
+      }
+      var ind = 0;
+      var dob = 0;
+      var fam = 0;
+      for (a in response) {
+        if (response[a].type == "ind") {
+          ind = ind + 1;
+        }
+        if (response[a].type == "dob") {
+          dob = dob + 1;
+        }
+        if (response[a].type == "fam") {
+          fam = fam + 1;
+        }
+      }
+      var dispo = new Array();
+      dispo.push(ind, dob, fam);
+      callback(null, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+        },
+        body: JSON.stringify({
+          ind: ind,
+          dob: dob,
+          fam: fam
+        })
+      })
+    }
+  })
+};
+
 module.exports.findAllApi = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
   const sql = 'SELECT * FROM reservas';
