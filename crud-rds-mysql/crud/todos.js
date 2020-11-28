@@ -258,9 +258,9 @@ module.exports.create = (event, context, callback) => {
     hora: body.hora
   };
 
-  if (turno = 0)
+  if (body.turno = "0")
   {
-    hora = "21h"
+    data.hora = "21h";
   }
   //FECHA A BUSCAR
   var id = body.day;
@@ -307,8 +307,7 @@ module.exports.create = (event, context, callback) => {
               "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
             },
             body: JSON.stringify({
-              data,
-              res: "Reserva Fallida : No hay más reservas Individuales para " + body.day + " a las : " + body.hora,
+              res: "Reserva Fallida : No hay más reservas Individuales para " + data.day + " a las : " + data.hora,
             })
           })
         }
@@ -324,8 +323,7 @@ module.exports.create = (event, context, callback) => {
               "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
             },
             body: JSON.stringify({
-              data,
-              res: "Reserva Fallida : No hay más reservas Dobles para " + body.day + " a las  : " + body.hora,
+              res: "Reserva Fallida : No hay más reservas Dobles para " + data.day + " a las  : " + data.hora,
             })
           })
         }
@@ -341,8 +339,7 @@ module.exports.create = (event, context, callback) => {
               "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
             },
             body: JSON.stringify({
-              data,
-              res: "Reserva Fallida : No hay más reservas Familiares para " + body.day + " a las : " + body.hora,
+              res: "Reserva Fallida : No hay más reservas Familiares para " + data.day + " a las : " + data.hora,
             })
           })
         }
@@ -370,8 +367,7 @@ module.exports.create = (event, context, callback) => {
                 "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
               },
               body: JSON.stringify({
-                data,
-                res: `Reserva realizada correctamente con id ` + result.insertId + ` para el dia ` + data.day + " a las : " + body.hora,
+                res: `Reserva realizada correctamente con id ` + result.insertId + ` para el dia ` + data.day + " a las : " + data.hora,
               })
             })
           }
