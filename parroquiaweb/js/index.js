@@ -81,7 +81,9 @@ $(".submitForm").click(function(){
           "type": window.type,
           "p1": $(".formP1").val(),
           "p2": $(".formP2").val(),
-          "com": $(".comunidadList").val()
+          "com": $(".comunidadList").val(),
+          "turno":window.turno,
+          "hora":window.hora
         }
       };
       
@@ -199,15 +201,16 @@ window.onload = function() {
 
     var sabado = calcularProximosEventos(6);
     month = sabado.getMonth()+1;
-    $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno 1 : 18h";
-    $('.sabado-id2')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno 2 : 19:30h";
-    $('.sabado-id3')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno 3 : 21h";
+    $('.sabado-id')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno<1> : 18h";
+    $('.sabado-id2')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno<2> : 19:30h";
+    $('.sabado-id3')[0].innerText = "Sábado : "+ sabado.getDate()+"/"+month+"/"+sabado.getFullYear()+" Turno<3> : 21h";
 
     
     
     fillPlazas()
     $( '.list-group-item' ).click(function() {
         fillSelect($(this));
+        fillPlazas()
       });
    
 
@@ -221,10 +224,20 @@ window.onload = function() {
     {
         var data = $('.active').text();
         var fecha = data.split(": ")[1];
+        var turno = data.split("<")[1]
+        if(turno != undefined)
+        {
+            turno = data.split("<")[1].charAT(0);
+        }
+        else
+        {
+            turno = "0";
+        }
+
         fecha = fecha.replace('/', 'a');        
-        fecha = fecha.replace('/', 'a');        
+        fecha = fecha.replace('/', 'a');
         var settings = {
-            "url": "https://3koehqpokc.execute-api.eu-west-1.amazonaws.com/dev/avail/"+fecha,
+            "url": "https://3koehqpokc.execute-api.eu-west-1.amazonaws.com/dev/avail/"+fecha+"+"+turno,
             "method": "GET",
             "timeout": 0,
           };
