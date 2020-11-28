@@ -258,6 +258,10 @@ module.exports.create = (event, context, callback) => {
     hora: body.hora
   };
 
+  if (turno = 0)
+  {
+    hora = "21h"
+  }
   //FECHA A BUSCAR
   var id = body.day;
   var turno = body.turno;

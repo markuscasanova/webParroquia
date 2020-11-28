@@ -20,7 +20,7 @@ $(".personaList2").click(function(){
     $(".alert-warning").hide();
     $(".numberList").show();
     clearAllInputs()
-    window.type = "bin"
+    window.type = "dob"
 });
 $(".personaList3").click(function(){
     $(".hideP1").hide();
@@ -94,7 +94,7 @@ $(".submitForm").click(function(){
         resetInterface();
         saveLocalStorage(response.data);
         location.reload(true);
-    });
+    });g
 });
 
 function saveLocalStorage(data)
@@ -140,7 +140,7 @@ function validateForm()
             if (!$('.formP1').val()){return "Persona 1"}
             if ($('.comunidadList').val()){check= false}
         break;
-        case "bin":
+        case "dob":
             if (!$('.formP1').val()){return "Persona 1"}
             if (!$('.formP2').val()){return "Persona 2"}
             if ($('.comunidadList').val()){check= false}
