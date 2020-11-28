@@ -228,9 +228,9 @@ window.onload = function() {
           $.ajax(settings).done(function (response) {
             console.log(response);
             var individuales = document.createElement("li");
-            var n1 = 20 - parseInt(response.ind);
-            var n2 = 20 - parseInt(response.dob);
-            var n3 = 20 - parseInt(response.fam);
+            var n1 = 17 - parseInt(response.ind);
+            var n2 = 14 - parseInt(response.dob);
+            var n3 = 12 - parseInt(response.fam);
 
             individuales.innerText ="Reservas individuales Restantes : " + n1;
             $('#individuales').append(individuales); 
