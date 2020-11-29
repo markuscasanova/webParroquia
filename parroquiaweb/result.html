@@ -53,128 +53,20 @@
   <h1>Próximos eventos</h1>
 
   <div class="list-group">
-    <button type="button" class="list-group-item list-group-item-action martes-id active">Cras justo odio</button>
+    <button type="button" class="list-group-item list-group-item-action martes-id">Cras justo odio</button>
     <button type="button" class="list-group-item list-group-item-action miercoles-id">Dapibus ac facilisis in</button>
     <button type="button" class="list-group-item list-group-item-action sabado-id">Morbi leo risus</button>
     <button type="button" class="list-group-item list-group-item-action sabado-id2">Porta ac consectetur ac</button>
     <button type="button" class="list-group-item list-group-item-action sabado-id3">Vestibulum at eros</button>
   </div>
-
-
-  
-  <h1>Plazas Disponibles</h1>
-
-  <div id="individuales">
-    <li></li>
-  </div>
-  <div id="Dobles">
-    <li></li>
-  </div>
-  <div id="Familiares">
-    <li></li>
-  </div>
-<h1></h1>  
-
-  <div class="alert alert-warning" role="alert">
-    Seleccione cuanta gente quiere registrar.
-  </div>
-
-  <button type="button" class="listP btn btn-outline-primary personaList1 btn-lg">Individual</button>
-  <button type="button" class="listP btn btn btn-outline-warning personaList2 btn-lg">Dos Personas</button>
-  <button type="button" class="listP btn btn-outline-danger personaList3 btn-lg">Grupos (3 a 6p)</button>
-
-  <p class="h4 mb-4"></p>
-
-  <!-- Name -->
-  <div class="form-group">
-    <div class="hideP1">
-      <label for="exampleFormControlInput1">Persona 1</label>
-    </div>        
-    <div class="hideFam">
-      <label for="exampleFormControlInput1">Responsable Familiar</label>
-    </div>        
-    <div class="hideP3">
-      <label for="exampleFormControlInput1">Persona 3</label>
-      <input type="text" class="form-control p3" id="exampleFormControlInput1" placeholder="">
-    </div>
-  </div>
-  <input type="text" id="defaultContactFormName" class="form-control mb-4 formP1" placeholder="Nombre Completo">
-  <div class="hideP2" >
-    <label for="exampleFormControlInput1">Persona 2</label>
-    <input type="text" class="form-control formP2" id="exampleFormControlInput1" placeholder="Nombre Completo">
-  </div>
-  <p class="h4 mb-4"></p>
-  <div class="numberList">
-    <div class="form-group">
-      <label for="exampleFormControlSelect1">Comunidad</label>
-      <select class="form-control comunidadList" id="exampleFormControlSelect1">
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-        <option>6</option>
-        <option>7</option>
-        <option>8</option>
-        <option>9</option>
-        <option>10</option>
-        <option>11</option>
-        <option>12</option>
-        <option>13</option>
-        <option>14</option>
-        <option>15</option>
-        <option>16</option>
-        <option>17</option>
-        <option>18</option>
-        <option>19</option>
-        <option>20</option>
-      </select>
-    </div>
-    <p class="h4 mb-4"></p>
-    <p class="h4 mb-4"></p>
-    <p class="h4 mb-4"></p>
-
-    <!-- <p>Date: <input type="text" id="datepicker" class="datepicker" data-date-format="mm/dd/yyyy"></p> -->
-
-
-  </div>
-  <!-- Send button -->
-  <button class="btn btn-info btn-block submitForm" type="submit">Reservar</button>
 </form>
 
 <table id="grid-data-api" class="table table-condensed table-hover table-striped" data-toggle="bootgrid" data-ajax="true" data-url="https://pdmx2p5svd.execute-api.eu-west-1.amazonaws.com/dev/todos/api">
-  <thead>
-      <tr>
-          <th data-column-id="id" data-type="numeric" data-identifier="true">ID</th>
-          <th data-column-id="day">Día</th>
-          <th data-column-id="type" data-order="desc">Tipo</th>
-          <th data-column-id="p1">Persona Titular</th>
-          <th data-column-id="p2" data-order="desc">Acompañante</th>
-          <th data-column-id="com">Comunidad</th>
-      </tr>
-  </thead>
+  <div id="container"></div>
+
 </table>
 
-<div class="reservasCacheadas">
-  <div class="w3-panel w3-yellow">
-    <h3>Reservas realizadas recientemente</h3>
-    <div id="demo" class="display">
-      <table class="display dataTable">
-        <thead>
-          <tr>
-            <th>Com.</th>
-            <th>Día</th>
-            <th>Persona</th>
-            <th>Acompañante</th>
-            <th>Tipo</th>
-          </tr>
-      </thead>
-      <tbody class="bodyReservas">
-      </tbody>
-      </table>
-  </div>    <p>Esta función se encuentra en fase de desarrollo. Se pueden encontrar errores que afecten al rendimiento de la aplicación y se resolverán lo más rápido posible.</p>
-  </div> 
-</div>
+
 <!-- Default fo
   </section>
 
@@ -184,7 +76,6 @@
       <p class="m-0 text-center text-white small">Copyright &copy; Marc Casanova</p>
     </div>
     <!-- /.container -->
-    <a href="http://127.0.0.1:5500/parroquiaweb/result.html">Reservas Realizadas</a>
   </footer>
 
 </body>
@@ -203,9 +94,13 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
 
+//FancyGrid
+<link href="https://cdn.fancygrid.com/fancy.min.css" rel="stylesheet">
+<script src="https://cdn.fancygrid.com/fancy.min.js"></script>
+
 <link href="/dist/jquery.bootgrid.css" rel="stylesheet">
 <script src="/dist/jquery.bootgrid.js"></script>
 
-<script src="js/index.js"></script>
+<script src="js/index2.js"></script>
 
 </html>
