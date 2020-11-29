@@ -187,7 +187,8 @@ window.onload = function() {
     $(".datepicker").attr("autocomplete", "off");
     //$("#grid-basic").bootgrid();
     //writeData();
-    loadCachedRes()
+    try{loadCachedRes()}
+    catch{};
     var martes = calcularProximosEventos(2);
     var month = martes.getMonth()+1;
     $('.martes-id')[0].innerText = "Martes : "+ martes.getDate()+"/"+month+"/"+martes.getFullYear();
