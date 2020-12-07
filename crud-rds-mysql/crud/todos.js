@@ -255,8 +255,14 @@ module.exports.create = (event, context, callback) => {
     p3: body.p3,
     com: body.com,
     turno:body.turno,
-    hora: body.hora
+    hora: body.hora,
+    celebracion: body.celebracion
   };
+
+  var failedInd = false;
+  var failedDob = false;
+  var failedFam = false; 
+  var adaptamos = false; 
 
   if (body.turno = "0")
   {
@@ -265,7 +271,7 @@ module.exports.create = (event, context, callback) => {
   //FECHA A BUSCAR
   var id = body.day;
   var turno = body.turno;
-  const sqlAvail = 'SELECT * FROM reservas WHERE day = ? && turno = ?';
+  const sqlAvail = 'SELECT * FROM reservas WHERE day = ?';
   //COMPROBAMOS QUE AÚN QUEDAN ESPACIOS DISPONIBLES PARA ESE DÍA
   connection.query(sqlAvail, [id, turno], (error, response) => {
     if (error) {
@@ -280,6 +286,8 @@ module.exports.create = (event, context, callback) => {
       })
     }
     else {
+      console.log(data);
+      console.log(JSON.stringify({response}));
       var ind = 0;
       var dob = 0;
       var fam = 0;
@@ -296,41 +304,56 @@ module.exports.create = (event, context, callback) => {
       }
       var dispo = new Array();
       dispo.push(ind, dob, fam);
+      console.log(dispo);
+      var limiteind = body.celebracion == "Eucaristia" ? 19 : 25;
+      console.log("El limite Individual del día es :" + limiteind);
+      var limitedob = body.celebracion == "Eucaristia" ? 19 : 19;
+      console.log("El limite doble del día es :" + limitedob);
+      var limitefam = "12";
+      console.log("El limite familiar del día es : 12");
       if (body.type == "ind") {
-        if (ind >= "17") {
+        console.log("Es una reserva Individual");
+        if (ind < limiteind && fam < limitefam) {
+          avail = true;
+          console.log("Reservamos");
+        }
+        if (ind >= limiteind)
+        {
+          adaptamos = true;
           avail = false;
-          callback(null, {
-            statusCode: 200,
-            headers: {
-              "Access-Control-Allow-Headers": "Content-Type",
-              "Access-Control-Allow-Origin": "*",
-              "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-            },
-            body: JSON.stringify({
-              res: "Reserva Fallida : No hay más reservas Individuales para " + data.day + " a las : " + data.hora,
-            })
-          })
+        }
+        if (ind >= limiteind && fam >= limitefam) {
+          adaptamos = false;
+          console.log("Dispo Fam " + fam + " de : " + limitefam);
+          avail = false;
+          failedInd = true;
+          console.log("Dispo Ind " + ind + " de : " + limiteind);
         }
       }
       if (body.type == "dob") {
-        if (dob >= "14") {
+        console.log("Es una reserva Doble");
+        if (dob < limitedob && fam < limitefam) {
+          avail = true;
+          console.log("Reservamos");
+        }
+        if (dob >= limitedob)
+        { 
+          adaptamos = true;
           avail = false;
-          callback(null, {
-            statusCode: 200,
-            headers: {
-              "Access-Control-Allow-Headers": "Content-Type",
-              "Access-Control-Allow-Origin": "*",
-              "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-            },
-            body: JSON.stringify({
-              res: "Reserva Fallida : No hay más reservas Dobles para " + data.day + " a las  : " + data.hora,
-            })
-          })
+        }
+        if (dob >= limitedob && fam  == limitefam) {
+          adaptamos = false;
+          avail = false;
+          console.log("Dispo Fam " + fam + " de : " + limitefam);
+          failedDob = true;
+          console.log("Dispo Dob " + dob + " de : " + limitedob);
         }
       }
       if (body.type == "fam") {
-        if (fam >= "12") {
+        console.log("Es una reserva Familiar");
+        if (fam >= limitefam) {
           avail = false;
+          console.log("Dispo Dob " + fam + " de : " + limitefam);
           callback(null, {
             statusCode: 200,
             headers: {
@@ -340,12 +363,20 @@ module.exports.create = (event, context, callback) => {
             },
             body: JSON.stringify({
               res: "Reserva Fallida : No hay más reservas Familiares para " + data.day + " a las : " + data.hora,
+              dispo
             })
           })
+        }
+        else
+        {
+          avail = true;
         }
       }
       if(avail)
       {
+        console.log("Disponible " + data.type);
+        console.log(JSON.stringify({data}));
+
         const sql = 'INSERT INTO reservas SET ?';
         connection.query(sql, [data], (error, result) => {
           if (error) {
@@ -367,10 +398,58 @@ module.exports.create = (event, context, callback) => {
                 "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
               },
               body: JSON.stringify({
-                res: `Reserva realizada correctamente con id ` + result.insertId + ` para el dia ` + data.day + " a las : " + data.hora,
+                res: "Reserva " + data.type + " realizada correctamente con id " + result.insertId + " para el dia " + data.day + " a las : " + data.hora,
+                dispo
               })
             })
           }
+        })
+      }
+      if(failedInd)
+      {
+        var texto = "Individuales";
+        console.log("Falla individual");
+      }
+      if(failedDob)
+      {
+        var texto = "Dobles";
+        console.log("Falla Dobles");
+      }            
+      if(failedFam)
+      {
+        var texto = "Familiares";
+        console.log("Falla Familiare");
+      }
+      if(adaptamos)
+      {
+        console.log("Adaptamos reserva");
+        callback(null, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+          },
+          body: JSON.stringify({
+            res: "Adaptamos " + data.type +  " para el día : " + data.day + " a las : " + data.hora,
+            dispo
+          })
+        })
+      }
+      if (failedInd || failedDob || failedFam) {
+        avail = false;
+
+        callback(null, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+          },
+          body: JSON.stringify({
+            res: "Reserva Fallida : No hay más reservas " + texto + " para " + data.day + " a las : " + data.hora,
+            dispo
+          })
         })
       }
     }
