@@ -259,10 +259,22 @@ module.exports.create = (event, context, callback) => {
     celebracion: body.celebracion
   };
 
+  function isEmpty(obj) {
+    for(var prop in obj) {
+      if(obj.hasOwnProperty(prop))
+        return false;
+    }
+  
+    return true;
+  }
+
+
+
   var failedInd = false;
   var failedDob = false;
   var failedFam = false; 
   var adaptamos = false; 
+  var familiares; 
 
   if (body.turno = "0")
   {
@@ -353,7 +365,7 @@ module.exports.create = (event, context, callback) => {
         console.log("Es una reserva Familiar");
         if (fam >= limitefam) {
           avail = false;
-          console.log("Dispo Dob " + fam + " de : " + limitefam);
+          console.log("Dispo Fam " + fam + " de : " + limitefam);
           callback(null, {
             statusCode: 200,
             headers: {
@@ -369,16 +381,54 @@ module.exports.create = (event, context, callback) => {
         }
         else
         {
+          console.log("Disponible reserva Familiar");
           avail = true;
         }
+      }
+      if(data.type != 'ind')
+      {
+        if(data.type != 'dob')
+        {
+          if(data.type != 'fam')
+          {
+            console.log("Tipo no válido");
+            console.log("")
+            avail = false;
+            failedInd = true;
+          }
+        }
+      }
+      if(adaptamos)
+      {
+        familiares = response.filter(character => character.type === 'fam');
+        console.log("Adaptamos reserva");
+
+
+
+        callback(null, {
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+          },
+          body: JSON.stringify({
+            res: "Adaptamos " + data.type +  " para el día : " + data.day + " a las : " + data.hora,
+            dispo,
+            familiares
+          })
+        })
       }
       if(avail)
       {
         console.log("Disponible " + data.type);
         console.log(JSON.stringify({data}));
 
-        const sql = 'INSERT INTO reservas SET ?';
-        connection.query(sql, [data], (error, result) => {
+        const reserva = 'INSERT INTO reservas SET ?';
+        const asientos = 'SELECT t.* FROM curso_sls.bancos t WHERE fecha = ?';
+        const crearRow = 'INSERT INTO curso_sls.bancos (fecha) VALUES (?)';
+        var reservarAsiento = 'UPDATE curso_sls.bancos t SET t.a = ? WHERE t.fecha = ?';
+        connection.query(reserva, [data], (error, r1) => {
           if (error) {
             callback({
               statusCode: 500,
@@ -390,17 +440,115 @@ module.exports.create = (event, context, callback) => {
               body: JSON.stringify(error)
             })
           } else {
-            callback(null, {
-              statusCode: 200,
-              headers: {
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-              },
-              body: JSON.stringify({
-                res: "Reserva " + data.type + " realizada correctamente con id " + result.insertId + " para el dia " + data.day + " a las : " + data.hora,
-                dispo
-              })
+              connection.query(asientos, [data.day], (error, r2) => {
+              if (error) {
+                callback({
+                  statusCode: 500,
+                  headers: {
+                    "Access-Control-Allow-Headers": "Content-Type",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                  },
+                  body: JSON.stringify(error)
+                })
+              } else {
+                function plaza(obj,data) {
+                  console.log(JSON.stringify(obj));
+                  var array = obj[0];
+                  console.log(JSON.stringify(array));
+                  var tipo = data.type;
+                  for(var p in array) 
+                  {
+                    console.log(array[p]);
+                    var letter = tipo[0];
+                    console.log(letter + " --> " + p[0]);
+                    if(array[p] == null && letter == p[0])
+                    {
+                      console.log("Encontramos asiento");
+                      var asiento = Object.keys(obj[0]);
+                      console.log(p);
+                      console.log(reservarAsiento);
+                      var result = reservarAsiento.replace('t.a','t.'+p);
+                      console.log(result);
+                      return result
+                    }
+                  }
+                  console.log(reservarAsiento);
+                  if(data.type == 'ind')
+                  {
+                    var result = reservarAsiento.replace('t.a','t.i1');
+                  }
+                  if(data.type == 'dob')
+                  {
+                    var result = reservarAsiento.replace('t.a','t.d1');
+                  }
+                  if(data.type == 'fam')
+                  {
+                    var result = reservarAsiento.replace('t.a','t.f1');
+                  }
+                  console.log(result);
+                  return result;
+                }
+                if(isEmpty(r2))
+                {
+                  connection.query(crearRow, [data.day], (error, createRow) => {
+                    if (error) {
+                      callback({
+                        statusCode: 500,
+                        headers: {
+                          "Access-Control-Allow-Headers": "Content-Type",
+                          "Access-Control-Allow-Origin": "*",
+                          "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                        },
+                        body: JSON.stringify(error)
+                      })
+                    } else {
+                      console.log("Creamos Row para : " + data.day);
+                      console.log(JSON.stringify(createRow));
+                    }
+                  })
+                }
+                var asignacion = plaza(r2, data);
+                console.log("La plaza libre es : " + asignacion)
+                connection.query(asignacion, [r1.insertId,data.day], (error, resAsiento) => {
+                  if (error) {
+                    callback({
+                      statusCode: 500,
+                      headers: {
+                        "Access-Control-Allow-Headers": "Content-Type",
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                      },
+                      body: JSON.stringify(error)
+                    })
+                  } else {
+                    if (!isEmpty(r2))
+                    {
+                      var createRow = "Row ya estaba creada";
+                    }
+                    if (isEmpty(r2))
+                    {
+                      var createRow = "Row recien Creada";
+                    }
+                    callback(null, {
+                      statusCode: 200,
+                      headers: {
+                        "Access-Control-Allow-Headers": "Content-Type",
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                      },
+                      body: JSON.stringify({
+                        res: "Reserva " + data.type + " realizada correctamente con id " + r1.insertId + " para el dia " + data.day + " a las : " + data.hora,
+                        dispo,
+                        r1,
+                        r2,
+                        resAsiento,
+                        createRow
+                      })
+                    })
+                  }
+                })
+              }
             })
           }
         })
@@ -420,22 +568,6 @@ module.exports.create = (event, context, callback) => {
         var texto = "Familiares";
         console.log("Falla Familiare");
       }
-      if(adaptamos)
-      {
-        console.log("Adaptamos reserva");
-        callback(null, {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-          },
-          body: JSON.stringify({
-            res: "Adaptamos " + data.type +  " para el día : " + data.day + " a las : " + data.hora,
-            dispo
-          })
-        })
-      }
       if (failedInd || failedDob || failedFam) {
         avail = false;
 
@@ -448,7 +580,10 @@ module.exports.create = (event, context, callback) => {
           },
           body: JSON.stringify({
             res: "Reserva Fallida : No hay más reservas " + texto + " para " + data.day + " a las : " + data.hora,
-            dispo
+            dispo,
+            failedInd,
+            failedDob,
+            failedFam
           })
         })
       }
