@@ -52,8 +52,7 @@ module.exports.dispo = (event, context, callback) => {
       })
     } else {
       console.log(response.length)
-      for (b in response)
-      {
+      for (b in response) {
         console.log("La respuesta SQL es : " + response[b]);
       }
       var ind = 0;
@@ -193,7 +192,7 @@ module.exports.avail = (event, context, callback) => {
   console.log(str + turno);
 
   const sql = 'SELECT * FROM reservas WHERE day = ? && turno = ?';
-  connection.query(sql, [str,turno], (error, response) => {
+  connection.query(sql, [str, turno], (error, response) => {
     if (error) {
       callback({
         statusCode: 500,
@@ -206,8 +205,7 @@ module.exports.avail = (event, context, callback) => {
       })
     } else {
       console.log(response.length)
-      for (b in response)
-      {
+      for (b in response) {
         console.log("La respuesta SQL es : " + response[b]);
       }
       var ind = 0;
@@ -254,17 +252,17 @@ module.exports.create = (event, context, callback) => {
     p2: body.p2,
     p3: body.p3,
     com: body.com,
-    turno:body.turno,
+    turno: body.turno,
     hora: body.hora,
     celebracion: body.celebracion
   };
 
   function isEmpty(obj) {
-    for(var prop in obj) {
-      if(obj.hasOwnProperty(prop))
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop))
         return false;
     }
-  
+
     return true;
   }
 
@@ -272,12 +270,11 @@ module.exports.create = (event, context, callback) => {
 
   var failedInd = false;
   var failedDob = false;
-  var failedFam = false; 
-  var adaptamos = false; 
-  var familiares; 
+  var failedFam = false;
+  var adaptamos = false;
+  var familiares;
 
-  if (body.turno = "0")
-  {
+  if (body.turno = "0") {
     data.hora = "21h";
   }
   //FECHA A BUSCAR
@@ -299,7 +296,7 @@ module.exports.create = (event, context, callback) => {
     }
     else {
       console.log(data);
-      console.log(JSON.stringify({response}));
+      console.log(JSON.stringify({ response }));
       var ind = 0;
       var dob = 0;
       var fam = 0;
@@ -317,9 +314,9 @@ module.exports.create = (event, context, callback) => {
       var dispo = new Array();
       dispo.push(ind, dob, fam);
       console.log(dispo);
-      var limiteind = body.celebracion == "Eucaristia" ? 19 : 25;
+      var limiteind = body.celebracion == "Eucaristia" ? 20 : 26;
       console.log("El limite Individual del día es :" + limiteind);
-      var limitedob = body.celebracion == "Eucaristia" ? 19 : 19;
+      var limitedob = body.celebracion == "Eucaristia" ? 14 : 14;
       console.log("El limite doble del día es :" + limitedob);
       var limitefam = "12";
       console.log("El limite familiar del día es : 12");
@@ -329,8 +326,7 @@ module.exports.create = (event, context, callback) => {
           avail = true;
           console.log("Reservamos");
         }
-        if (ind >= limiteind)
-        {
+        if (ind >= limiteind) {
           adaptamos = true;
           avail = false;
         }
@@ -348,12 +344,11 @@ module.exports.create = (event, context, callback) => {
           avail = true;
           console.log("Reservamos");
         }
-        if (dob >= limitedob)
-        { 
+        if (dob >= limitedob) {
           adaptamos = true;
           avail = false;
         }
-        if (dob >= limitedob && fam  == limitefam) {
+        if (dob >= limitedob && fam == limitefam) {
           adaptamos = false;
           avail = false;
           console.log("Dispo Fam " + fam + " de : " + limitefam);
@@ -379,18 +374,14 @@ module.exports.create = (event, context, callback) => {
             })
           })
         }
-        else
-        {
+        else {
           console.log("Disponible reserva Familiar");
           avail = true;
         }
       }
-      if(data.type != 'ind')
-      {
-        if(data.type != 'dob')
-        {
-          if(data.type != 'fam')
-          {
+      if (data.type != 'ind') {
+        if (data.type != 'dob') {
+          if (data.type != 'fam') {
             console.log("Tipo no válido");
             console.log("")
             avail = false;
@@ -398,31 +389,89 @@ module.exports.create = (event, context, callback) => {
           }
         }
       }
-      if(adaptamos)
-      {
-        familiares = response.filter(character => character.type === 'fam');
+      if (adaptamos) {
+        var asientosTodos;
         console.log("Adaptamos reserva");
+        const asientosDisponibles = 'SELECT t.* FROM curso_sls.bancos t WHERE fecha = ?';
+        console.log("Adaptamos reserva");
+        connection.query(asientosDisponibles, [data.day], (error, respuestaAsientos) => {
+          if (error) {
+            callback({
+              statusCode: 500,
+              headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+              },
+              body: JSON.stringify(error)
+            })
+          }
+          else {
+            asientosTodos = respuestaAsientos;
+            if (data.type == 'ind') {
+              console.log("Adaptamos Individual");
+            }
+            if (data.type == 'dob') {
+              console.log("Adaptamos Doble");
+            }
+            if (data.type == 'fam') {
+              callback(null, {
+                statusCode: 200,
+                headers: {
+                  "Access-Control-Allow-Headers": "Content-Type",
+                  "Access-Control-Allow-Origin": "*",
+                  "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                },
+                body: JSON.stringify({
+                  res: "Adaptamos " + data.type + " para el día : " + data.day + " a las : " + data.hora,
+                  dispo,
+                  familiares,
+                  asientosTodos
+                })
+              })
+            }
+            var tipe = data.type;
+            var arrays = asientosTodos[0];
+            console.log(JSON.stringify(arrays));
+            for (a in arrays) {
+              var letter = tipe[0];
+              console.log("null?" + arrays[a]);
+              console.log("prope" + arrays.a);
 
+              if (arrays[a] == null && a[0] == "f") {
+                console.log("Encontramos asiento");
+                console.log(a);
+              }
+              if(arrays[a] == 0 && a[0] == "f")
+              {
+                var lista = Array();
+                for(x in arrays)
+                {
+                  lista.push(x);
+                }
+                console.log("Encontramos Reserva Mixta sin completar");
+                var seleccion = a;
+                console.log("La selección es : " + a);
 
-
-        callback(null, {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-          },
-          body: JSON.stringify({
-            res: "Adaptamos " + data.type +  " para el día : " + data.day + " a las : " + data.hora,
-            dispo,
-            familiares
-          })
+                console.log(lista);
+                var filtrado = lista.filter(word => word.includes(seleccion+data.type));
+                console.log(filtrado);
+                for(i in filtrado)
+                {
+                  console.log(arrays.i);
+                  if(arrays[i] == "null")
+                  {
+                    console.log("Encontramos Hueco Segmentado en : "  + i);
+                  }
+                }
+              }
+            }
+          }
         })
       }
-      if(avail)
-      {
+      if (avail) {
         console.log("Disponible " + data.type);
-        console.log(JSON.stringify({data}));
+        console.log(JSON.stringify({ data }));
 
         const reserva = 'INSERT INTO reservas SET ?';
         const asientos = 'SELECT t.* FROM curso_sls.bancos t WHERE fecha = ?';
@@ -440,7 +489,7 @@ module.exports.create = (event, context, callback) => {
               body: JSON.stringify(error)
             })
           } else {
-              connection.query(asientos, [data.day], (error, r2) => {
+            connection.query(asientos, [data.day], (error, r2) => {
               if (error) {
                 callback({
                   statusCode: 500,
@@ -452,45 +501,39 @@ module.exports.create = (event, context, callback) => {
                   body: JSON.stringify(error)
                 })
               } else {
-                function plaza(obj,data) {
+                function plaza(obj, data) {
                   console.log(JSON.stringify(obj));
                   var array = obj[0];
                   console.log(JSON.stringify(array));
                   var tipo = data.type;
-                  for(var p in array) 
-                  {
+                  for (var p in array) {
                     console.log(array[p]);
                     var letter = tipo[0];
                     console.log(letter + " --> " + p[0]);
-                    if(array[p] == null && letter == p[0])
-                    {
+                    if (array[p] == null && letter == p[0]) {
                       console.log("Encontramos asiento");
                       var asiento = Object.keys(obj[0]);
                       console.log(p);
                       console.log(reservarAsiento);
-                      var result = reservarAsiento.replace('t.a','t.'+p);
+                      var result = reservarAsiento.replace('t.a', 't.' + p);
                       console.log(result);
                       return result
                     }
                   }
                   console.log(reservarAsiento);
-                  if(data.type == 'ind')
-                  {
-                    var result = reservarAsiento.replace('t.a','t.i1');
+                  if (data.type == 'ind') {
+                    var result = reservarAsiento.replace('t.a', 't.i1');
                   }
-                  if(data.type == 'dob')
-                  {
-                    var result = reservarAsiento.replace('t.a','t.d1');
+                  if (data.type == 'dob') {
+                    var result = reservarAsiento.replace('t.a', 't.d1');
                   }
-                  if(data.type == 'fam')
-                  {
-                    var result = reservarAsiento.replace('t.a','t.f1');
+                  if (data.type == 'fam') {
+                    var result = reservarAsiento.replace('t.a', 't.fa1');
                   }
                   console.log(result);
                   return result;
                 }
-                if(isEmpty(r2))
-                {
+                if (isEmpty(r2)) {
                   connection.query(crearRow, [data.day], (error, createRow) => {
                     if (error) {
                       callback({
@@ -510,7 +553,7 @@ module.exports.create = (event, context, callback) => {
                 }
                 var asignacion = plaza(r2, data);
                 console.log("La plaza libre es : " + asignacion)
-                connection.query(asignacion, [r1.insertId,data.day], (error, resAsiento) => {
+                connection.query(asignacion, [r1.insertId, data.day], (error, resAsiento) => {
                   if (error) {
                     callback({
                       statusCode: 500,
@@ -522,12 +565,10 @@ module.exports.create = (event, context, callback) => {
                       body: JSON.stringify(error)
                     })
                   } else {
-                    if (!isEmpty(r2))
-                    {
+                    if (!isEmpty(r2)) {
                       var createRow = "Row ya estaba creada";
                     }
-                    if (isEmpty(r2))
-                    {
+                    if (isEmpty(r2)) {
                       var createRow = "Row recien Creada";
                     }
                     callback(null, {
@@ -553,18 +594,15 @@ module.exports.create = (event, context, callback) => {
           }
         })
       }
-      if(failedInd)
-      {
+      if (failedInd) {
         var texto = "Individuales";
         console.log("Falla individual");
       }
-      if(failedDob)
-      {
+      if (failedDob) {
         var texto = "Dobles";
         console.log("Falla Dobles");
-      }            
-      if(failedFam)
-      {
+      }
+      if (failedFam) {
         var texto = "Familiares";
         console.log("Falla Familiare");
       }
