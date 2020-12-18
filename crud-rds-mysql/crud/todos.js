@@ -295,126 +295,86 @@ module.exports.create = (event, context, callback) => {
       })
     }
     else {
-      console.log(data);
-      console.log(JSON.stringify({ response }));
-      var ind = 0;
-      var dob = 0;
-      var fam = 0;
-      for (a in response) {
-        if (response[a].type == "ind") {
-          ind = ind + 1;
-        }
-        if (response[a].type == "dob") {
-          dob = dob + 1;
-        }
-        if (response[a].type == "fam") {
-          fam = fam + 1;
-        }
-      }
-      var dispo = new Array();
-      dispo.push(ind, dob, fam);
-      console.log(dispo);
-      var limiteind = body.celebracion == "Eucaristia" ? 20 : 26;
-      console.log("El limite Individual del día es :" + limiteind);
-      var limitedob = body.celebracion == "Eucaristia" ? 14 : 14;
-      console.log("El limite doble del día es :" + limitedob);
-      var limitefam = "12";
-      console.log("El limite familiar del día es : 12");
-      if (body.type == "ind") {
-        console.log("Es una reserva Individual");
-        if (ind < limiteind && fam < limitefam) {
-          avail = true;
-          console.log("Reservamos");
-        }
-        if (ind >= limiteind) {
-          adaptamos = true;
-          avail = false;
-        }
-        if (ind >= limiteind && fam >= limitefam) {
-          adaptamos = false;
-          console.log("Dispo Fam " + fam + " de : " + limitefam);
-          avail = false;
-          failedInd = true;
-          console.log("Dispo Ind " + ind + " de : " + limiteind);
-        }
-      }
-      if (body.type == "dob") {
-        console.log("Es una reserva Doble");
-        if (dob < limitedob && fam < limitefam) {
-          avail = true;
-          console.log("Reservamos");
-        }
-        if (dob >= limitedob) {
-          adaptamos = true;
-          avail = false;
-        }
-        if (dob >= limitedob && fam == limitefam) {
-          adaptamos = false;
-          avail = false;
-          console.log("Dispo Fam " + fam + " de : " + limitefam);
-          failedDob = true;
-          console.log("Dispo Dob " + dob + " de : " + limitedob);
-        }
-      }
-      if (body.type == "fam") {
-        console.log("Es una reserva Familiar");
-        if (fam >= limitefam) {
-          avail = false;
-          console.log("Dispo Fam " + fam + " de : " + limitefam);
-          callback(null, {
-            statusCode: 200,
+      const asientosDisponibles = 'SELECT t.* FROM curso_sls.bancos t WHERE fecha = ?';
+      connection.query(asientosDisponibles, [data.day], (error, respuestaAsientos) => {
+        if (error) {
+          callback({
+            statusCode: 500,
             headers: {
               "Access-Control-Allow-Headers": "Content-Type",
               "Access-Control-Allow-Origin": "*",
               "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
             },
-            body: JSON.stringify({
-              res: "Reserva Fallida : No hay más reservas Familiares para " + data.day + " a las : " + data.hora,
-              dispo
-            })
+            body: JSON.stringify(error)
           })
         }
         else {
-          console.log("Disponible reserva Familiar");
-          avail = true;
-        }
-      }
-      if (data.type != 'ind') {
-        if (data.type != 'dob') {
-          if (data.type != 'fam') {
-            console.log("Tipo no válido");
-            console.log("")
-            avail = false;
-            failedInd = true;
-          }
-        }
-      }
-      if (adaptamos) {
-        var asientosTodos;
-        console.log("Adaptamos reserva");
-        const asientosDisponibles = 'SELECT t.* FROM curso_sls.bancos t WHERE fecha = ?';
-        console.log("Adaptamos reserva");
-        connection.query(asientosDisponibles, [data.day], (error, respuestaAsientos) => {
-          if (error) {
-            callback({
-              statusCode: 500,
-              headers: {
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-              },
-              body: JSON.stringify(error)
-            })
-          }
-          else {
-            asientosTodos = respuestaAsientos;
-            if (data.type == 'ind') {
-              console.log("Adaptamos Individual");
+          console.log(data);
+          console.log(JSON.stringify({ response }));
+          var ind = 0;
+          var dob = 0;
+          var fam = 0;
+          for (a in response) {
+            if (response[a].type == "ind") {
+              ind = ind + 1;
             }
-            if (data.type == 'dob') {
-              console.log("Adaptamos Doble");
+            if (response[a].type == "dob") {
+              dob = dob + 1;
             }
-            if (data.type == 'fam') {
+            if (response[a].type == "fam") {
+              fam = fam + 1;
+            }
+          }
+          var dispo = new Array();
+          dispo.push(ind, dob, fam);
+          console.log(dispo);
+          var limiteind = body.celebracion == "Eucaristia" ? 20 : 26;
+          console.log("El limite Individual del día es :" + limiteind);
+          var limitedob = body.celebracion == "Eucaristia" ? 14 : 14;
+          console.log("El limite doble del día es :" + limitedob);
+          var limitefam = "12";
+          console.log("El limite familiar del día es : 12");
+          if (body.type == "ind") {
+            console.log("Es una reserva Individual");
+            if (ind < limiteind && fam < limitefam) {
+              avail = true;
+              console.log("Reservamos");
+            }
+            if (ind >= limiteind) {
+              adaptamos = true;
+              avail = false;
+            }
+            if (ind >= limiteind && fam >= limitefam) {
+              adaptamos = false;
+              console.log("Dispo Fam " + fam + " de : " + limitefam);
+              avail = false;
+              failedInd = true;
+              console.log("Dispo Ind " + ind + " de : " + limiteind);
+            }
+          }
+          if (body.type == "dob") {
+            console.log("Es una reserva Doble");
+            if (dob < limitedob && fam < limitefam) {
+              avail = true;
+              console.log("Reservamos");
+            }
+            if (dob >= limitedob) {
+              adaptamos = true;
+              avail = false;
+            }
+            if (dob >= limitedob && fam == limitefam) {
+              adaptamos = false;
+              avail = false;
+              console.log("Dispo Fam " + fam + " de : " + limitefam);
+              failedDob = true;
+              console.log("Dispo Dob " + dob + " de : " + limitedob);
+            }
+          }
+          if (body.type == "fam") {
+            console.log("Es una reserva Familiar");
+            if (fam >= limitefam) {
+              avail = false;
+              console.log("Dispo Fam " + fam + " de : " + limitefam);
               callback(null, {
                 statusCode: 200,
                 headers: {
@@ -423,73 +383,125 @@ module.exports.create = (event, context, callback) => {
                   "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
                 },
                 body: JSON.stringify({
-                  res: "Adaptamos " + data.type + " para el día : " + data.day + " a las : " + data.hora,
-                  dispo,
-                  familiares,
-                  asientosTodos
+                  res: "Reserva Fallida : No hay más reservas Familiares para " + data.day + " a las : " + data.hora,
+                  dispo
                 })
               })
             }
+            else {
+              console.log("Disponible reserva Familiar");
+              avail = true;
+            }
+          }
+          if (data.type != 'ind') {
+            if (data.type != 'dob') {
+              if (data.type != 'fam') {
+                console.log("Tipo no válido");
+                console.log("")
+                avail = false;
+                failedInd = true;
+              }
+            }
+          }
+          if (adaptamos) {
+            var asientosTodos;
+            console.log("Adaptamos reserva");
+            var valor;
+            var oloresp;
+            var result2;
+            var conta = false;
+            asientosTodos = respuestaAsientos;
             var tipe = data.type;
             var arrays = asientosTodos[0];
             console.log(JSON.stringify(arrays));
-            for (a in arrays) {
-              var letter = tipe[0];
-              console.log("null?" + arrays[a]);
-              console.log("prope" + arrays.a);
-
-              if (arrays[a] == null && a[0] == "f") {
-                console.log("Encontramos asiento");
-                console.log(a);
+            if (tipe == 'ind') {
+              console.log("Adaptamos Individual");
+            }
+            if (tipe == 'dob') {
+              console.log("Adaptamos Doble");
+            }
+            var lista = Array();
+            for (x in arrays) {
+              if (arrays[a] == 0 && a[0] == "f") {
+                lista.push(x);
               }
-              if(arrays[a] == 0 && a[0] == "f")
-              {
-                var lista = Array();
-                for(x in arrays)
-                {
-                  lista.push(x);
-                }
+            }
+            console.log("La lista de posibles huecos es : " + lista);
+
+            for (a in arrays) {
+              if (a[0] == "f" && arrays[a] == "0") {
+                console.log("null?" + arrays[a]);
                 console.log("Encontramos Reserva Mixta sin completar");
                 var seleccion = a;
                 console.log("La selección es : " + a);
 
-                console.log(lista);
-                var filtrado = lista.filter(word => word.includes(seleccion+data.type));
+                var filtrado = lista.filter(word => word.includes(seleccion + data.type));
                 console.log(filtrado);
-                for(i in filtrado)
-                {
-                  console.log(arrays.i);
-                  if(arrays[i] == "null")
-                  {
-                    console.log("Encontramos Hueco Segmentado en : "  + i);
+                if (!filtrado.isEmpty) {
+                  for (i in filtrado) {
+                    var hueco = filtrado[i];
+                    console.log("Filtrado : " + filtrado);
+                    console.log("Hueco : " + hueco);
+                    console.log("Valor : " + arrays[hueco]);
+                    if (!arrays[hueco]) {
+                      console.log("Encontramos Hueco Segmentado en : " + hueco);
+                      var mensaje = "Encontramos Hueco Segmentado en : " + hueco;
+                      var SLK = 'UPDATE curso_sls.bancos t SET t.a = ? WHERE t.fecha = ?';
+                      var SLK3 = 'UPDATE curso_sls.bancos t SET t.b = \'99999\' WHERE t.fecha = ?';
+                      var result = SLK.replace('t.a', 't.' + hueco);
+                      var result2 = SLK3.replace('t.b', 't.' + seleccion);
+                      SLK.replace('.a', hueco);
+                      var valor = '12321'
+                      connection.query(result, [valor, body.day], (error, oloresp) => {
+                        if (error) {
+                          callback({
+                            statusCode: 500,
+                            headers: {
+                              "Access-Control-Allow-Headers": "Content-Type",
+                              "Access-Control-Allow-Origin": "*",
+                              "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                            },
+                            body: JSON.stringify(error)
+                          })
+                        } else {
+                          console.log(oloresp);
+                          connection.query(result2, [body.day], (error, rrr) => { })
+                          setTimeout(log2(), 500);
+                          callback(null, {
+                            statusCode: 200,
+                            headers: {
+                              "Access-Control-Allow-Headers": "Content-Type",
+                              "Access-Control-Allow-Origin": "*",
+                              "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                            },
+                            body: JSON.stringify({ oloresp })
+                          })
+                        }
+                      })
+                      setTimeout(log1(), 500);
+
+                    }
+                    if (arrays[hueco]) {
+                      console.log("Encontramos Hueco pero no está vacío en : " + hueco + " con resultado : " + arrays[hueco]);
+                    }
                   }
+                }
+                if (arrays[a] == null && a[0] == "f" && a[0].includes(tipe)) {
+                  console.log("Encontramos asiento");
+                  console.log(a);
                 }
               }
             }
           }
-        })
-      }
-      if (avail) {
-        console.log("Disponible " + data.type);
-        console.log(JSON.stringify({ data }));
+          if (avail) {
+            console.log("Disponible " + data.type);
+            console.log(JSON.stringify({ data }));
 
-        const reserva = 'INSERT INTO reservas SET ?';
-        const asientos = 'SELECT t.* FROM curso_sls.bancos t WHERE fecha = ?';
-        const crearRow = 'INSERT INTO curso_sls.bancos (fecha) VALUES (?)';
-        var reservarAsiento = 'UPDATE curso_sls.bancos t SET t.a = ? WHERE t.fecha = ?';
-        connection.query(reserva, [data], (error, r1) => {
-          if (error) {
-            callback({
-              statusCode: 500,
-              headers: {
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-              },
-              body: JSON.stringify(error)
-            })
-          } else {
-            connection.query(asientos, [data.day], (error, r2) => {
+            const reserva = 'INSERT INTO reservas SET ?';
+            const asientos = 'SELECT t.* FROM curso_sls.bancos t WHERE fecha = ?';
+            const crearRow = 'INSERT INTO curso_sls.bancos (fecha) VALUES (?)';
+            var reservarAsiento = 'UPDATE curso_sls.bancos t SET t.a = ? WHERE t.fecha = ?';
+            connection.query(reserva, [data], (error, r1) => {
               if (error) {
                 callback({
                   statusCode: 500,
@@ -501,59 +513,7 @@ module.exports.create = (event, context, callback) => {
                   body: JSON.stringify(error)
                 })
               } else {
-                function plaza(obj, data) {
-                  console.log(JSON.stringify(obj));
-                  var array = obj[0];
-                  console.log(JSON.stringify(array));
-                  var tipo = data.type;
-                  for (var p in array) {
-                    console.log(array[p]);
-                    var letter = tipo[0];
-                    console.log(letter + " --> " + p[0]);
-                    if (array[p] == null && letter == p[0]) {
-                      console.log("Encontramos asiento");
-                      var asiento = Object.keys(obj[0]);
-                      console.log(p);
-                      console.log(reservarAsiento);
-                      var result = reservarAsiento.replace('t.a', 't.' + p);
-                      console.log(result);
-                      return result
-                    }
-                  }
-                  console.log(reservarAsiento);
-                  if (data.type == 'ind') {
-                    var result = reservarAsiento.replace('t.a', 't.i1');
-                  }
-                  if (data.type == 'dob') {
-                    var result = reservarAsiento.replace('t.a', 't.d1');
-                  }
-                  if (data.type == 'fam') {
-                    var result = reservarAsiento.replace('t.a', 't.fa1');
-                  }
-                  console.log(result);
-                  return result;
-                }
-                if (isEmpty(r2)) {
-                  connection.query(crearRow, [data.day], (error, createRow) => {
-                    if (error) {
-                      callback({
-                        statusCode: 500,
-                        headers: {
-                          "Access-Control-Allow-Headers": "Content-Type",
-                          "Access-Control-Allow-Origin": "*",
-                          "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-                        },
-                        body: JSON.stringify(error)
-                      })
-                    } else {
-                      console.log("Creamos Row para : " + data.day);
-                      console.log(JSON.stringify(createRow));
-                    }
-                  })
-                }
-                var asignacion = plaza(r2, data);
-                console.log("La plaza libre es : " + asignacion)
-                connection.query(asignacion, [r1.insertId, data.day], (error, resAsiento) => {
+                connection.query(asientos, [data.day], (error, r2) => {
                   if (error) {
                     callback({
                       statusCode: 500,
@@ -565,66 +525,132 @@ module.exports.create = (event, context, callback) => {
                       body: JSON.stringify(error)
                     })
                   } else {
-                    if (!isEmpty(r2)) {
-                      var createRow = "Row ya estaba creada";
+                    function plaza(obj, data) {
+                      console.log(JSON.stringify(obj));
+                      var array = obj[0];
+                      console.log(JSON.stringify(array));
+                      var tipo = data.type;
+                      for (var p in array) {
+                        console.log(array[p]);
+                        var letter = tipo[0];
+                        console.log(letter + " --> " + p[0]);
+                        if (array[p] == null && letter == p[0]) {
+                          console.log("Encontramos asiento");
+                          var asiento = Object.keys(obj[0]);
+                          console.log(p);
+                          console.log(reservarAsiento);
+                          var result = reservarAsiento.replace('t.a', 't.' + p);
+                          console.log(result);
+                          return result
+                        }
+                      }
+                      console.log(reservarAsiento);
+                      if (data.type == 'ind') {
+                        var result = reservarAsiento.replace('t.a', 't.i1');
+                      }
+                      if (data.type == 'dob') {
+                        var result = reservarAsiento.replace('t.a', 't.d1');
+                      }
+                      if (data.type == 'fam') {
+                        var result = reservarAsiento.replace('t.a', 't.fa1');
+                      }
+                      console.log(result);
+                      return result;
                     }
                     if (isEmpty(r2)) {
-                      var createRow = "Row recien Creada";
-                    }
-                    callback(null, {
-                      statusCode: 200,
-                      headers: {
-                        "Access-Control-Allow-Headers": "Content-Type",
-                        "Access-Control-Allow-Origin": "*",
-                        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-                      },
-                      body: JSON.stringify({
-                        res: "Reserva " + data.type + " realizada correctamente con id " + r1.insertId + " para el dia " + data.day + " a las : " + data.hora,
-                        dispo,
-                        r1,
-                        r2,
-                        resAsiento,
-                        createRow
+                      connection.query(crearRow, [data.day], (error, createRow) => {
+                        if (error) {
+                          callback({
+                            statusCode: 500,
+                            headers: {
+                              "Access-Control-Allow-Headers": "Content-Type",
+                              "Access-Control-Allow-Origin": "*",
+                              "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                            },
+                            body: JSON.stringify(error)
+                          })
+                        } else {
+                          console.log("Creamos Row para : " + data.day);
+                          console.log(JSON.stringify(createRow));
+                        }
                       })
+                    }
+                    var asignacion = plaza(r2, data);
+                    console.log("La plaza libre es : " + asignacion)
+                    connection.query(asignacion, [r1.insertId, data.day], (error, resAsiento) => {
+                      if (error) {
+                        callback({
+                          statusCode: 500,
+                          headers: {
+                            "Access-Control-Allow-Headers": "Content-Type",
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                          },
+                          body: JSON.stringify(error)
+                        })
+                      } else {
+                        if (!isEmpty(r2)) {
+                          var createRow = "Row ya estaba creada";
+                        }
+                        if (isEmpty(r2)) {
+                          var createRow = "Row recien Creada";
+                        }
+                        callback(null, {
+                          statusCode: 200,
+                          headers: {
+                            "Access-Control-Allow-Headers": "Content-Type",
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                          },
+                          body: JSON.stringify({
+                            res: "Reserva " + data.type + " realizada correctamente con id " + r1.insertId + " para el dia " + data.day + " a las : " + data.hora,
+                            dispo,
+                            r1,
+                            r2,
+                            resAsiento,
+                            createRow
+                          })
+                        })
+                      }
                     })
                   }
                 })
               }
             })
           }
-        })
-      }
-      if (failedInd) {
-        var texto = "Individuales";
-        console.log("Falla individual");
-      }
-      if (failedDob) {
-        var texto = "Dobles";
-        console.log("Falla Dobles");
-      }
-      if (failedFam) {
-        var texto = "Familiares";
-        console.log("Falla Familiare");
-      }
-      if (failedInd || failedDob || failedFam) {
-        avail = false;
+          if (failedInd) {
+            var texto = "Individuales";
+            console.log("Falla individual");
+          }
+          if (failedDob) {
+            var texto = "Dobles";
+            console.log("Falla Dobles");
+          }
+          if (failedFam) {
+            var texto = "Familiares";
+            console.log("Falla Familiare");
+          }
+          if (failedInd || failedDob || failedFam) {
+            avail = false;
 
-        callback(null, {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-          },
-          body: JSON.stringify({
-            res: "Reserva Fallida : No hay más reservas " + texto + " para " + data.day + " a las : " + data.hora,
-            dispo,
-            failedInd,
-            failedDob,
-            failedFam
-          })
-        })
-      }
+            callback(null, {
+              statusCode: 200,
+              headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+              },
+              body: JSON.stringify({
+                res: "Reserva Fallida : No hay más reservas " + texto + " para " + data.day + " a las : " + data.hora,
+                dispo,
+                failedInd,
+                failedDob,
+                failedFam
+              })
+            })
+          }
+        }
+      })
     }
   })
 };
