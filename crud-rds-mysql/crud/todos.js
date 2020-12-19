@@ -244,8 +244,8 @@ module.exports.avail = (event, context, callback) => {
 module.exports.create = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
   var avail = true;
-  const body = queryString.parse(event['body']);
-  const data = {
+  var body = queryString.parse(event['body']);
+  var data = {
     day: body.day,
     type: body.type,
     p1: body.p1,
@@ -410,8 +410,10 @@ module.exports.create = (event, context, callback) => {
             var oloresp;
             var result2;
             var conta = false;
+            var stop;
             asientosTodos = respuestaAsientos;
             var tipe = data.type;
+            console.log(JSON.stringify(respuestaAsientos));
             var arrays = asientosTodos[0];
             console.log(JSON.stringify(arrays));
             if (tipe == 'ind') {
@@ -422,19 +424,18 @@ module.exports.create = (event, context, callback) => {
             }
             var lista = Array();
             for (x in arrays) {
-              if (arrays[a] == 0 && a[0] == "f") {
+              if (arrays[x] == null && x[0] == "f") {
                 lista.push(x);
               }
             }
-            console.log("La lista de posibles huecos es : " + lista);
+            console.log("La lista de posibles huecos es : " + JSON.stringify(lista));
 
             for (a in arrays) {
               if (a[0] == "f" && arrays[a] == "0") {
                 console.log("null?" + arrays[a]);
                 console.log("Encontramos Reserva Mixta sin completar");
                 var seleccion = a;
-                console.log("La selección es : " + a);
-
+                console.log("La selección es : " + a + " apuntando a : " + a + data.type);
                 var filtrado = lista.filter(word => word.includes(seleccion + data.type));
                 console.log(filtrado);
                 if (!filtrado.isEmpty) {
@@ -443,16 +444,14 @@ module.exports.create = (event, context, callback) => {
                     console.log("Filtrado : " + filtrado);
                     console.log("Hueco : " + hueco);
                     console.log("Valor : " + arrays[hueco]);
-                    if (!arrays[hueco]) {
+                    if (!arrays[hueco] && !stop) {
                       console.log("Encontramos Hueco Segmentado en : " + hueco);
                       var mensaje = "Encontramos Hueco Segmentado en : " + hueco;
-                      var SLK = 'UPDATE curso_sls.bancos t SET t.a = ? WHERE t.fecha = ?';
-                      var SLK3 = 'UPDATE curso_sls.bancos t SET t.b = \'99999\' WHERE t.fecha = ?';
-                      var result = SLK.replace('t.a', 't.' + hueco);
-                      var result2 = SLK3.replace('t.b', 't.' + seleccion);
+                      var SLK = 'INSERT INTO reservas SET ?';
+                      var SLK3 = 'UPDATE curso_sls.bancos t SET t.b = ? WHERE t.fecha = ?';
                       SLK.replace('.a', hueco);
                       var valor = '12321'
-                      connection.query(result, [valor, body.day], (error, oloresp) => {
+                      connection.query(SLK, [body], (error, oloresp) => {
                         if (error) {
                           callback({
                             statusCode: 500,
@@ -465,21 +464,42 @@ module.exports.create = (event, context, callback) => {
                           })
                         } else {
                           console.log(oloresp);
-                          connection.query(result2, [body.day], (error, rrr) => { })
-                          setTimeout(log2(), 500);
-                          callback(null, {
-                            statusCode: 200,
-                            headers: {
-                              "Access-Control-Allow-Headers": "Content-Type",
-                              "Access-Control-Allow-Origin": "*",
-                              "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-                            },
-                            body: JSON.stringify({ oloresp })
+                          var result2 = SLK3.replace('t.b', 't.' + seleccion);
+                          var close = "9999999";
+                          connection.query(result2, [close,body.day], (error, updateInfo) => {
+                            if (error) {
+                              callback({
+                                statusCode: 500,
+                                headers: {
+                                  "Access-Control-Allow-Headers": "Content-Type",
+                                  "Access-Control-Allow-Origin": "*",
+                                  "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                                },
+                                body: JSON.stringify(error)
+                              })
+                            } else {
+                              console.log(updateInfo);
+                              var result3 = SLK3.replace('t.b', 't.' + hueco);
+                              connection.query(result3, [oloresp.insertId, body.day], (error, updatePut) => {
+                                callback(null, {
+                                  statusCode: 200,
+                                  headers: {
+                                    "Access-Control-Allow-Headers": "Content-Type",
+                                    "Access-Control-Allow-Origin": "*",
+                                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                                  },
+                                  body: JSON.stringify({
+                                    oloresp,
+                                    updateInfo,
+                                    updatePut
+                                  })
+                                })
+                              })
+                            }
                           })
                         }
                       })
-                      setTimeout(log1(), 500);
-
+                      var stop = true;
                     }
                     if (arrays[hueco]) {
                       console.log("Encontramos Hueco pero no está vacío en : " + hueco + " con resultado : " + arrays[hueco]);
@@ -492,6 +512,15 @@ module.exports.create = (event, context, callback) => {
                 }
               }
             }
+            callback(null, {
+              statusCode: 500,
+              headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+              },
+              body: "NO HAY MÁS RESERVAS MIXTAS PARA : " + body.type
+            })
           }
           if (avail) {
             console.log("Disponible " + data.type);
