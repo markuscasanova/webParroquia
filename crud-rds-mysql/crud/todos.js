@@ -326,6 +326,7 @@ module.exports.create = (event, context, callback) => {
           var bases = new Array();
           var bases1 = new Array();
           var bases2 = new Array();
+          var famReale = new Array();
           var famidispo = false;
           console.log("Importante");
           console.log(JSON.stringify(respuestaAsientos));
@@ -350,12 +351,22 @@ module.exports.create = (event, context, callback) => {
               }
 
             }
-            if (respuestaAsientos[0][p] != null  && respuestaAsientos[0][p] != 0 && respuestaAsientos[0][p] != 9999999 && p[0] == "f") {
-              console.log("Reserva Familiar vacía : " + respuestaAsientos[0][p]);
+            if (respuestaAsientos[0][p] != null   && p[0] == "f" && p != "fecha") {
+              console.log(p + " <-- Reserva Familiar no vacía : " + respuestaAsientos[0][p]);
               var notInd = p.includes("ind");
               var notDob = p.includes("dob");
               if (!notInd && !notDob) {
+                console.log("Pusheamos familiar : " + respuestaAsientos[0][p]);
                 bases.push(p);
+              }
+            }
+            if (respuestaAsientos[0][p] != null && respuestaAsientos[0][p] == 9999999 && p[0] == "f" && p != "fecha") {
+              console.log(p + " <-- Reserva Familiar no vacía : " + respuestaAsientos[0][p]);
+              var notInd = p.includes("ind");
+              var notDob = p.includes("dob");
+              if (!notInd && !notDob) {
+                console.log("Pusheamos familiar REAL: " + respuestaAsientos[0][p]);
+                famReale.push(p);
               }
             }
             if (respuestaAsientos[0][p] == null && p[0] == "f") {
@@ -370,8 +381,10 @@ module.exports.create = (event, context, callback) => {
           var ind = bases1.length;
           var dob = bases2.length;
           var fam = bases.length;
+          var famReal = famReale.length;
+
           var dispo = new Array();
-          dispo.push(ind, dob, fam);
+          dispo.push(ind, dob, fam, famReal);
           console.log(dispo);
           var limiteind = body.celebracion == "Eucaristia" ? 20 : 26;
           console.log("El limite Individual del día es :" + limiteind);
@@ -389,7 +402,7 @@ module.exports.create = (event, context, callback) => {
               adaptamos = true;
               avail = false;
             }
-            if (ind >= limiteind && fam >= limitefam) {
+            if (ind >= limiteind && fam >= limitefam && famReal >= limitefam) {
               adaptamos = false;
               console.log("Dispo Fam " + fam + " de : " + limitefam);
               avail = false;
@@ -407,7 +420,7 @@ module.exports.create = (event, context, callback) => {
               adaptamos = true;
               avail = false;
             }
-            if (dob >= limitedob && fam == limitefam) {
+            if (dob >= limitedob && fam == limitefam && famReal >= limitefam) {
               adaptamos = false;
               avail = false;
               console.log("Dispo Fam " + fam + " de : " + limitefam);
@@ -417,7 +430,7 @@ module.exports.create = (event, context, callback) => {
           }
           if (body.type == "fam" && famidispo) {
             console.log("Es una reserva Familiar");
-            if (fam >= limitefam) {
+            if (fam >= limitefam && famReal >= limitefam) {
               avail = false;
               console.log("Dispo Fam " + fam + " de : " + limitefam);
               callback(null, {
@@ -553,6 +566,7 @@ module.exports.create = (event, context, callback) => {
                                     "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
                                   },
                                   body: JSON.stringify({
+                                    dispo,
                                     oloresp,
                                     updateInfo,
                                     updatePut
@@ -638,6 +652,7 @@ module.exports.create = (event, context, callback) => {
                                     "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
                                   },
                                   body: JSON.stringify({
+                                    dispo,
                                     insertDiv,
                                     updateMod,
                                     updateMod2
