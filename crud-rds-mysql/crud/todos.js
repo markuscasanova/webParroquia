@@ -567,6 +567,7 @@ module.exports.create = (event, context, callback) => {
                                     "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
                                   },
                                   body: JSON.stringify({
+                                    res: "Reserva " + data.type + " realizada correctamente con id " + oloresp.insertId + " para el dia " + data.day + " a las : " + data.hora,
                                     dispo,
                                     oloresp,
                                     updateInfo,
@@ -653,6 +654,7 @@ module.exports.create = (event, context, callback) => {
                                     "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
                                   },
                                   body: JSON.stringify({
+                                    res: "Reserva " + data.type + " realizada correctamente con id " + insertDiv.insertId + " para el dia " + data.day + " a las : " + data.hora,
                                     dispo,
                                     insertDiv,
                                     updateMod,
