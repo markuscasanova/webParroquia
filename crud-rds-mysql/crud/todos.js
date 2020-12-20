@@ -272,6 +272,7 @@ module.exports.create = (event, context, callback) => {
   var failedInd = false;
   var failedDob = false;
   var failedFam = false;
+  var faliedGeneric = false;
   var adaptamos = false;
   var familiares;
 
@@ -668,7 +669,7 @@ module.exports.create = (event, context, callback) => {
                   }
                 }
               }
-              failedDob = true;
+              faliedGeneric = true;
             }
           }
           if (avail) {
@@ -808,7 +809,11 @@ module.exports.create = (event, context, callback) => {
             var texto = "Familiares";
             console.log("Falla Familiare");
           }
-          if ((failedInd || failedDob || failedFam) && !letsgo) {
+          if (faliedGeneric) {
+            var texto = data.type;
+            console.log("Falla " + data.type);
+          }          
+          if ((failedInd || failedDob || failedFam || faliedGeneric) && !letsgo) {
             avail = false;
 
             callback(null, {
