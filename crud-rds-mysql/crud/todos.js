@@ -1,5 +1,6 @@
 const connection = require('../connection');
 const queryString = require('querystring');
+const { type } = require('os');
 
 module.exports.findAll = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -404,6 +405,7 @@ module.exports.create = (event, context, callback) => {
             }
           }
           if (adaptamos) {
+            var huecoFilled = false;
             var asientosTodos;
             console.log("Adaptamos reserva");
             var valor;
@@ -422,13 +424,30 @@ module.exports.create = (event, context, callback) => {
             if (tipe == 'dob') {
               console.log("Adaptamos Doble");
             }
+            var splittedOnly = Array();
+            var baseOnly = Array();
             var lista = Array();
             for (x in arrays) {
               if (arrays[x] == null && x[0] == "f") {
                 lista.push(x);
               }
+              if (arrays[x] == null && x[0] == "f") {
+                var valida = x.includes(body.type);
+                if (valida) {
+                  splittedOnly.push(x);
+                }
+                var notInd = x.includes("ind");
+                var notDob = x.includes("dob");
+                if (!notInd && !notDob) {
+                  baseOnly.push(x);
+                }
+
+              }
             }
             console.log("La lista de posibles huecos es : " + JSON.stringify(lista));
+            console.log("La lista de posibles Splitted es : " + JSON.stringify(splittedOnly));
+            console.log("La lista de posibles Base es : " + JSON.stringify(baseOnly));
+
 
             for (a in arrays) {
               if (a[0] == "f" && arrays[a] == "0") {
@@ -436,7 +455,7 @@ module.exports.create = (event, context, callback) => {
                 console.log("Encontramos Reserva Mixta sin completar");
                 var seleccion = a;
                 console.log("La selección es : " + a + " apuntando a : " + a + data.type);
-                var filtrado = lista.filter(word => word.includes(seleccion + data.type));
+                var filtrado = splittedOnly.filter(word => word.includes(seleccion + data.type));
                 console.log(filtrado);
                 if (!filtrado.isEmpty) {
                   for (i in filtrado) {
@@ -466,7 +485,7 @@ module.exports.create = (event, context, callback) => {
                           console.log(oloresp);
                           var result2 = SLK3.replace('t.b', 't.' + seleccion);
                           var close = "9999999";
-                          connection.query(result2, [close,body.day], (error, updateInfo) => {
+                          connection.query(result2, [close, body.day], (error, updateInfo) => {
                             if (error) {
                               callback({
                                 statusCode: 500,
@@ -500,6 +519,7 @@ module.exports.create = (event, context, callback) => {
                         }
                       })
                       var stop = true;
+                      var huecoFilled = true;
                     }
                     if (arrays[hueco]) {
                       console.log("Encontramos Hueco pero no está vacío en : " + hueco + " con resultado : " + arrays[hueco]);
@@ -512,15 +532,79 @@ module.exports.create = (event, context, callback) => {
                 }
               }
             }
-            callback(null, {
-              statusCode: 500,
-              headers: {
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
-              },
-              body: "NO HAY MÁS RESERVAS MIXTAS PARA : " + body.type
-            })
+            //SI NO HAY RESERVAS MIXTAS, VAMOS A CREARLA
+            if (!huecoFilled) {
+              console.log("NO HAY MAS RESERVAS MIXTAS PARA : " + body.day + ". Buscamos Posible Hueco.");
+              var stop2 = false;
+              for (x in arrays) {
+                console.log(x + "-->" + x.includes(body.type));
+                if (x[0] == "f" && !arrays[x] && !stop2) {
+                  if (!x.includes("ind") && !x.includes("dob")) {
+                    console.log("Seleccionamos hueco : " + x);
+                    console.log(lista.filter(word => word.includes(x + body.type)));
+                    var compro = lista.filter(word => word.includes(x + body.type));
+                    if (compro.length >= 1) {
+                      const reservaAdaptada = 'INSERT INTO reservas SET ?';
+                      const updateBase = 'UPDATE curso_sls.bancos t SET t.a = 0 WHERE t.fecha = ?';
+                      const updateDivid = 'UPDATE curso_sls.bancos t SET t.a = ? WHERE t.fecha = ?';
+
+                      connection.query(reservaAdaptada, [body], (error, insertDiv) => {
+                        if (error) {
+                          callback({
+                            statusCode: 500,
+                            headers: {
+                              "Access-Control-Allow-Headers": "Content-Type",
+                              "Access-Control-Allow-Origin": "*",
+                              "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                            },
+                            body: JSON.stringify(error)
+                          })
+                        } else {
+                          console.log("Base --> " + compro[0].split(body.type)[0]);
+                          var base = compro[0].split(body.type)[0];
+
+                          var result3 = updateBase.replace('t.a', 't.' + base);
+                          var prox = "0";
+                          connection.query(result3, [body.day], (error, updateMod) => {
+                            if (error) {
+                              callback({
+                                statusCode: 500,
+                                headers: {
+                                  "Access-Control-Allow-Headers": "Content-Type",
+                                  "Access-Control-Allow-Origin": "*",
+                                  "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                                },
+                                body: JSON.stringify(error)
+                              })
+                            } else {
+                              console.log("Hueco --> " + compro[0]);
+                              var result5 = updateDivid.replace('t.a', 't.' + compro[0]);
+                              connection.query(result5, [insertDiv.insertId, body.day], (error, updateMod2) => {
+                                callback(null, {
+                                  statusCode: 200,
+                                  headers: {
+                                    "Access-Control-Allow-Headers": "Content-Type",
+                                    "Access-Control-Allow-Origin": "*",
+                                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+                                  },
+                                  body: JSON.stringify({
+                                    insertDiv,
+                                    updateMod,
+                                    updateMod2
+                                  })
+                                })
+                              })
+                            }
+                          })
+                        }
+                      })
+                      var stop2 = true;
+                    }
+                  }
+                }
+              }
+              failedDob = true;
+            }
           }
           if (avail) {
             console.log("Disponible " + data.type);
