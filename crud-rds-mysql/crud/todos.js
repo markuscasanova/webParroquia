@@ -322,10 +322,54 @@ module.exports.create = (event, context, callback) => {
             if (response[a].type == "dob") {
               dob = dob + 1;
             }
-            if (response[a].type == "fam") {
-              fam = fam + 1;
+          }
+          var bases = new Array();
+          var bases1 = new Array();
+          var bases2 = new Array();
+          var famidispo = false;
+          console.log("Importante");
+          console.log(JSON.stringify(respuestaAsientos));
+          for (p in respuestaAsientos[0])
+          {
+            console.log(p);
+            if (respuestaAsientos[0][p] != null && p[0] == "i") {
+              console.log("Reserva Individual vacía : " + respuestaAsientos[0][p]);
+              var notInd = p.includes("ind");
+              var notDob = p.includes("dob");
+              if (!notInd && !notDob) {
+                bases1.push(p);
+              }
+
+            }
+            if (respuestaAsientos[0][p] != null && p[0] == "d") {
+              console.log("Reserva Doble vacía : " + respuestaAsientos[0][p]);
+              var notInd = p.includes("ind");
+              var notDob = p.includes("dob");
+              if (!notInd && !notDob) {
+                bases2.push(p);
+              }
+
+            }
+            if (respuestaAsientos[0][p] != null  && respuestaAsientos[0][p] != 0 && respuestaAsientos[0][p] != 9999999 && p[0] == "f") {
+              console.log("Reserva Familiar vacía : " + respuestaAsientos[0][p]);
+              var notInd = p.includes("ind");
+              var notDob = p.includes("dob");
+              if (!notInd && !notDob) {
+                bases.push(p);
+              }
+            }
+            if (respuestaAsientos[0][p] == null && p[0] == "f") {
+              console.log("Reserva Familiar vacía : " + respuestaAsientos[0][p]);
+              var notInd = p.includes("ind");
+              var notDob = p.includes("dob");
+              if (!notInd && !notDob) {
+                famidispo= true;
+              }
             }
           }
+          var ind = bases1.length;
+          var dob = bases2.length;
+          var fam = bases.length;
           var dispo = new Array();
           dispo.push(ind, dob, fam);
           console.log(dispo);
@@ -371,7 +415,7 @@ module.exports.create = (event, context, callback) => {
               console.log("Dispo Dob " + dob + " de : " + limitedob);
             }
           }
-          if (body.type == "fam") {
+          if (body.type == "fam" && famidispo) {
             console.log("Es una reserva Familiar");
             if (fam >= limitefam) {
               avail = false;
@@ -413,6 +457,7 @@ module.exports.create = (event, context, callback) => {
             var result2;
             var conta = false;
             var stop;
+            var letsgo = false;
             asientosTodos = respuestaAsientos;
             var tipe = data.type;
             console.log(JSON.stringify(respuestaAsientos));
@@ -539,14 +584,19 @@ module.exports.create = (event, context, callback) => {
               for (x in arrays) {
                 console.log(x + "-->" + x.includes(body.type));
                 if (x[0] == "f" && !arrays[x] && !stop2) {
+                  console.log(x);
                   if (!x.includes("ind") && !x.includes("dob")) {
-                    console.log("Seleccionamos hueco : " + x);
+                    console.log("Seleccionamos hueco : " + x + " para : " +  x+body.type);
+                    console.log("La lista : " + lista);
                     console.log(lista.filter(word => word.includes(x + body.type)));
                     var compro = lista.filter(word => word.includes(x + body.type));
-                    if (compro.length >= 1) {
+                    if (compro[0]) {
+                      console.log("Entramos en COMPRO");
                       const reservaAdaptada = 'INSERT INTO reservas SET ?';
+                      console.log("Entramos en COMPRO 2");
                       const updateBase = 'UPDATE curso_sls.bancos t SET t.a = 0 WHERE t.fecha = ?';
                       const updateDivid = 'UPDATE curso_sls.bancos t SET t.a = ? WHERE t.fecha = ?';
+                      letsgo = true;
 
                       connection.query(reservaAdaptada, [body], (error, insertDiv) => {
                         if (error) {
@@ -735,7 +785,7 @@ module.exports.create = (event, context, callback) => {
             var texto = "Individuales";
             console.log("Falla individual");
           }
-          if (failedDob) {
+          if (failedDob && !letsgo) {
             var texto = "Dobles";
             console.log("Falla Dobles");
           }
@@ -743,7 +793,7 @@ module.exports.create = (event, context, callback) => {
             var texto = "Familiares";
             console.log("Falla Familiare");
           }
-          if (failedInd || failedDob || failedFam) {
+          if ((failedInd || failedDob || failedFam) && !letsgo) {
             avail = false;
 
             callback(null, {
