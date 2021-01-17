@@ -83,7 +83,8 @@ $(".submitForm").click(function(){
           "p2": $(".formP2").val(),
           "com": $(".comunidadList").val(),
           "turno":window.turno,
-          "hora":window.hora
+          "hora":window.hora,
+          "celebracion":window.celebracion
         }
       };
       
@@ -94,7 +95,7 @@ $(".submitForm").click(function(){
         resetInterface();
         saveLocalStorage(response.data);
         location.reload(true);
-    });g
+    });
 });
 
 function saveLocalStorage(data)
@@ -189,6 +190,10 @@ window.onload = function() {
     //writeData();
     try{loadCachedRes()}
     catch{};
+    var lunes = calcularProximosEventos(1);
+    var month = lunes.getMonth()+1;
+    $('.lunes-id')[0].innerText = "Lunes : "+ lunes.getDate()+"/"+month+"/"+lunes.getFullYear();
+    
     var martes = calcularProximosEventos(2);
     var month = martes.getMonth()+1;
     $('.martes-id')[0].innerText = "Martes : "+ martes.getDate()+"/"+month+"/"+martes.getFullYear();
@@ -236,40 +241,57 @@ window.onload = function() {
             window.turno = turno;
             window.fecha = fecha;
             window.day = fecha;
+            if(turno == 1)
+            {
+                window.hora = "18:00";
+                window.celebracion = "Eucaristia";
+            }
+            if(turno == 2)
+            {
+                window.hora = "19:30";
+                window.celebracion = "Eucaristia";
+            }
+            if(turno == 3)
+            {
+                window.hora = "21:00";
+                window.celebracion = "Eucaristia";
+            }
         }
         else
         {
             turno = "0";
             window.turno = turno;
+            window.hora = "21:00";
+            window.celebracion = "Palabra";
         }
 
         fecha = fecha.replace('/', 'a');        
         fecha = fecha.replace('/', 'a');
-        var settings = {
-            "url": "https://3koehqpokc.execute-api.eu-west-1.amazonaws.com/dev/avail/"+fecha+"+"+turno,
-            "method": "GET",
-            "timeout": 0,
-          };
+        // var settings = {
+        //     "url": "https://3koehqpokc.execute-api.eu-west-1.amazonaws.com/dev/avail/"+fecha+"+"+turno,
+        //     "method": "GET",
+        //     "timeout": 0,
+        //   };
           
-          $.ajax(settings).done(function (response) {
-            console.log(response);
-            //var individuales = document.createElement("li");
-            var n1 = 17 - parseInt(response.ind);
-            var n2 = 14 - parseInt(response.dob);
-            var n3 = 12 - parseInt(response.fam);
+        //   $.ajax(settings).done(function (response) {
+        //     console.log(response);
+        //     //var individuales = document.createElement("li");
+        //     var n1 = 17 - parseInt(response.ind);
+        //     var n2 = 14 - parseInt(response.dob);
+        //     var n3 = 12 - parseInt(response.fam);
 
-            //individuales.innerText ="Reservas individuales Restantes : " + n1;
-            $('#individuales li')[0].innerText = "Reservas individuales Restantes : " + n1; 
+        //     //individuales.innerText ="Reservas individuales Restantes : " + n1;
+        //     $('#individuales li')[0].innerText = "Reservas individuales Restantes : " + n1; 
     
-            var dobles = document.createElement("li");
-            //dobles.innerText = "Reservas Dobles Restantes : " + n2;
-            $('#Dobles li')[0].innerText = "Reservas Dobles Restantes : " + n2; 
+        //     var dobles = document.createElement("li");
+        //     //dobles.innerText = "Reservas Dobles Restantes : " + n2;
+        //     $('#Dobles li')[0].innerText = "Reservas Dobles Restantes : " + n2; 
     
     
-            var familiares = document.createElement("li");
-            //familiares.innerText = "Reservas Grupales Restantes : " + n3;
-            $('#Familiares li')[0].innerText = "Reservas Grupales Restantes : " + n3; 
-          });
+        //     var familiares = document.createElement("li");
+        //     //familiares.innerText = "Reservas Grupales Restantes : " + n3;
+        //     $('#Familiares li')[0].innerText = "Reservas Grupales Restantes : " + n3; 
+        // });
      }
     function calcularProximosEventos(x)
     {
