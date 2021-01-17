@@ -183,6 +183,40 @@ module.exports.availDate = (event, context, callback) => {
   })
 };
 
+module.exports.bancoDate = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+  //var id = event.pathParameters.todo;
+  var id = event.pathParameters.todo;
+  var str = id.replace(/a/g, '/');
+
+  const sql = 'SELECT * FROM bancos WHERE fecha = ?';
+  connection.query(sql, [str], (error, response) => {
+    if (error) {
+      callback({
+        statusCode: 500,
+        headers: {
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+        },
+        body: JSON.stringify(error)
+      })
+    } else {
+      callback(null, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE"
+        },
+        body: JSON.stringify({
+          todo: response
+        })
+      })
+    }
+  })
+};
+
 module.exports.avail = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
   var id = event.pathParameters.todo;
@@ -377,8 +411,8 @@ module.exports.create = (event, context, callback) => {
           console.log("El limite Individual del día es :" + limiteind);
           var limitedob = body.celebracion == "Eucaristia" ? 14 : 14;
           console.log("El limite doble del día es :" + limitedob);
-          var limitefam = "12";
-          console.log("El limite familiar del día es : 12");
+          var limitefam = "13";
+          console.log("El limite familiar del día es : 13");
           if (body.type == "ind") {
             console.log("Es una reserva Individual");
             if (ind < limiteind && fam < limitefam) {
